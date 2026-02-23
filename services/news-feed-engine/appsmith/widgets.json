@@ -1,0 +1,693 @@
+{
+  "widgets": {
+    "Dashboard": {
+      "StatsContainer": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "StatsContainer",
+        "columns": 4,
+        "children": [
+          {
+            "type": "STATBOX_WIDGET",
+            "widgetName": "TotalCreatorsStatBox",
+            "dynamicPropertyPathList": ["value"],
+            "value": "{{GetDashboardStats.data.total_creators || 0}}",
+            "label": "Total Creators",
+            "iconName": "user",
+            "iconColor": "#6C5CE7"
+          },
+          {
+            "type": "STATBOX_WIDGET",
+            "widgetName": "TotalContentStatBox",
+            "dynamicPropertyPathList": ["value"],
+            "value": "{{GetDashboardStats.data.total_content || 0}}",
+            "label": "Total Content",
+            "iconName": "document",
+            "iconColor": "#00B894"
+          },
+          {
+            "type": "STATBOX_WIDGET",
+            "widgetName": "ProcessedTodayStatBox",
+            "dynamicPropertyPathList": ["value"],
+            "value": "{{GetDashboardStats.data.processed_today || 0}}",
+            "label": "Processed Today",
+            "iconName": "tick-circle",
+            "iconColor": "#0984E3"
+          },
+          {
+            "type": "STATBOX_WIDGET",
+            "widgetName": "PendingReviewStatBox",
+            "dynamicPropertyPathList": ["value"],
+            "value": "{{GetDashboardStats.data.pending_review || 0}}",
+            "label": "Pending Review",
+            "iconName": "time",
+            "iconColor": "#FDCB6E"
+          }
+        ]
+      },
+      "ContentChart": {
+        "type": "CHART_WIDGET",
+        "widgetName": "ContentChart",
+        "chartType": "AREA_CHART",
+        "chartName": "Content Processing Trend",
+        "chartData": "{{GetDashboardStats.data.content_trend || []}}",
+        "xAxisName": "date",
+        "yAxisName": "count",
+        "customFusionChartConfig": {
+          "type": "area2d",
+          "dataSource": {
+            "chart": {
+              "theme": "fusion",
+              "showLegend": "1",
+              "legendPosition": "bottom"
+            }
+          }
+        }
+      },
+      "RecentContentTable": {
+        "type": "TABLE_WIDGET_V2",
+        "widgetName": "RecentContentTable",
+        "tableData": "{{GetDashboardStats.data.recent_content || []}}",
+        "primaryColumns": {
+          "title": {
+            "columnType": "text",
+            "alias": "Title",
+            "width": 250
+          },
+          "creator_name": {
+            "columnType": "text",
+            "alias": "Creator"
+          },
+          "category": {
+            "columnType": "text",
+            "alias": "Category"
+          },
+          "status": {
+            "columnType": "text",
+            "alias": "Status",
+            "cellBackground": "{{currentRow.status === 'published' ? '#D4EDDA' : currentRow.status === 'pending' ? '#FFF3CD' : '#F8D7DA'}}"
+          },
+          "created_at": {
+            "columnType": "date",
+            "alias": "Created",
+            "inputFormat": "YYYY-MM-DDTHH:mm:ss",
+            "outputFormat": "MMM DD, HH:mm"
+          }
+        },
+        "pageSize": 5,
+        "isVisible": true,
+        "animateLoading": true
+      },
+      "ProcessingStatus": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "ProcessingStatus",
+        "backgroundColor": "#FFFFFF",
+        "children": [
+          {
+            "type": "TEXT_WIDGET",
+            "widgetName": "ProcessingStatusTitle",
+            "text": "Processing Queue Status",
+            "fontStyle": "BOLD",
+            "fontSize": "1.25rem"
+          },
+          {
+            "type": "PROGRESS_WIDGET",
+            "widgetName": "ProcessingProgress",
+            "progress": "{{Math.round((GetProcessingQueue.data.completed / (GetProcessingQueue.data.total || 1)) * 100)}}",
+            "steps": 100,
+            "showResult": true,
+            "fillColor": "#6C5CE7"
+          },
+          {
+            "type": "TEXT_WIDGET",
+            "widgetName": "ProcessingDetails",
+            "text": "{{GetProcessingQueue.data.in_progress || 0}} in progress | {{GetProcessingQueue.data.queued || 0}} queued | {{GetProcessingQueue.data.failed || 0}} failed"
+          }
+        ]
+      }
+    },
+    "Creators": {
+      "CreatorsFilters": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "CreatorsFilters",
+        "orientation": "horizontal",
+        "children": [
+          {
+            "type": "SELECT_WIDGET",
+            "widgetName": "StatusFilter",
+            "placeholderText": "Filter by status",
+            "options": [
+              { "label": "All", "value": "" },
+              { "label": "Active", "value": "active" },
+              { "label": "Inactive", "value": "inactive" },
+              { "label": "Pending", "value": "pending" }
+            ],
+            "defaultOptionValue": "",
+            "onOptionChange": "{{GetCreators.run()}}"
+          },
+          {
+            "type": "SELECT_WIDGET",
+            "widgetName": "PlatformFilter",
+            "placeholderText": "Filter by platform",
+            "options": [
+              { "label": "All", "value": "" },
+              { "label": "YouTube", "value": "youtube" },
+              { "label": "Twitter", "value": "twitter" },
+              { "label": "Blog/RSS", "value": "rss" },
+              { "label": "Podcast", "value": "podcast" }
+            ],
+            "defaultOptionValue": "",
+            "onOptionChange": "{{GetCreators.run()}}"
+          },
+          {
+            "type": "BUTTON_WIDGET",
+            "widgetName": "AddCreatorButton",
+            "text": "Add Creator",
+            "buttonStyle": "PRIMARY",
+            "onClick": "{{showModal('AddCreatorModal')}}"
+          }
+        ]
+      },
+      "CreatorsTable": {
+        "type": "TABLE_WIDGET_V2",
+        "widgetName": "CreatorsTable",
+        "tableData": "{{GetCreators.data.creators || []}}",
+        "primaryColumns": {
+          "name": {
+            "columnType": "text",
+            "alias": "Name",
+            "width": 200
+          },
+          "platform": {
+            "columnType": "text",
+            "alias": "Platform",
+            "cellBackground": "{{currentRow.platform === 'youtube' ? '#FF000020' : currentRow.platform === 'twitter' ? '#1DA1F220' : '#00000010'}}"
+          },
+          "platform_id": {
+            "columnType": "text",
+            "alias": "Platform ID"
+          },
+          "topics": {
+            "columnType": "text",
+            "alias": "Topics",
+            "computedValue": "{{currentRow.topics?.join(', ') || '-'}}"
+          },
+          "trust_score": {
+            "columnType": "number",
+            "alias": "Trust Score",
+            "outputFormat": "0.00"
+          },
+          "content_count": {
+            "columnType": "number",
+            "alias": "Content"
+          },
+          "status": {
+            "columnType": "text",
+            "alias": "Status",
+            "cellBackground": "{{currentRow.status === 'active' ? '#D4EDDA' : currentRow.status === 'pending' ? '#FFF3CD' : '#F8D7DA'}}"
+          },
+          "actions": {
+            "columnType": "button",
+            "alias": "Actions",
+            "buttonLabel": "Edit",
+            "onClick": "{{showModal('EditCreatorModal')}}"
+          }
+        },
+        "serverSidePagination": true,
+        "totalRecordsCount": "{{GetCreators.data.total || 0}}",
+        "pageSize": 20,
+        "onPageChange": "{{GetCreators.run()}}",
+        "isVisible": true
+      },
+      "AddCreatorModal": {
+        "type": "MODAL_WIDGET",
+        "widgetName": "AddCreatorModal",
+        "title": "Add New Creator",
+        "size": "MODAL_LARGE",
+        "children": [
+          {
+            "type": "FORM_WIDGET",
+            "widgetName": "AddCreatorForm",
+            "children": [
+              {
+                "type": "INPUT_WIDGET_V2",
+                "widgetName": "CreatorNameInput",
+                "label": "Creator Name",
+                "placeholderText": "Enter creator name",
+                "isRequired": true,
+                "validation": {
+                  "minLength": 2,
+                  "maxLength": 200
+                }
+              },
+              {
+                "type": "SELECT_WIDGET",
+                "widgetName": "PlatformSelect",
+                "label": "Platform",
+                "options": [
+                  { "label": "YouTube", "value": "youtube" },
+                  { "label": "Twitter", "value": "twitter" },
+                  { "label": "Blog/RSS", "value": "rss" },
+                  { "label": "Podcast", "value": "podcast" }
+                ],
+                "isRequired": true
+              },
+              {
+                "type": "INPUT_WIDGET_V2",
+                "widgetName": "PlatformIdInput",
+                "label": "Platform ID",
+                "placeholderText": "Channel ID, @handle, or RSS URL",
+                "isRequired": true,
+                "tooltip": "For YouTube: channel ID. For Twitter: @handle. For RSS: feed URL."
+              },
+              {
+                "type": "INPUT_WIDGET_V2",
+                "widgetName": "TopicsInput",
+                "label": "Topics (comma-separated)",
+                "placeholderText": "technology, finance, AI"
+              },
+              {
+                "type": "INPUT_WIDGET_V2",
+                "widgetName": "TrustScoreInput",
+                "label": "Initial Trust Score",
+                "inputType": "NUMBER",
+                "defaultText": "0.5",
+                "minNum": 0,
+                "maxNum": 1,
+                "tooltip": "Score from 0 to 1. Higher = more trusted."
+              },
+              {
+                "type": "CONTAINER_WIDGET",
+                "widgetName": "FormButtons",
+                "orientation": "horizontal",
+                "children": [
+                  {
+                    "type": "BUTTON_WIDGET",
+                    "widgetName": "CancelAddCreator",
+                    "text": "Cancel",
+                    "buttonStyle": "SECONDARY",
+                    "onClick": "{{closeModal('AddCreatorModal')}}"
+                  },
+                  {
+                    "type": "BUTTON_WIDGET",
+                    "widgetName": "SubmitAddCreator",
+                    "text": "Add Creator",
+                    "buttonStyle": "PRIMARY",
+                    "onClick": "{{CreateCreator.run().then(() => closeModal('AddCreatorModal'))}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "EditCreatorModal": {
+        "type": "MODAL_WIDGET",
+        "widgetName": "EditCreatorModal",
+        "title": "Edit Creator",
+        "size": "MODAL_LARGE",
+        "children": [
+          {
+            "type": "FORM_WIDGET",
+            "widgetName": "EditCreatorForm",
+            "children": [
+              {
+                "type": "INPUT_WIDGET_V2",
+                "widgetName": "EditCreatorNameInput",
+                "label": "Creator Name",
+                "defaultText": "{{CreatorsTable.selectedRow.name}}",
+                "isRequired": true
+              },
+              {
+                "type": "TEXT_WIDGET",
+                "widgetName": "PlatformDisplay",
+                "text": "Platform: {{CreatorsTable.selectedRow.platform}} ({{CreatorsTable.selectedRow.platform_id}})"
+              },
+              {
+                "type": "INPUT_WIDGET_V2",
+                "widgetName": "EditTopicsInput",
+                "label": "Topics (comma-separated)",
+                "defaultText": "{{CreatorsTable.selectedRow.topics?.join(', ') || ''}}"
+              },
+              {
+                "type": "INPUT_WIDGET_V2",
+                "widgetName": "EditTrustScoreInput",
+                "label": "Trust Score",
+                "inputType": "NUMBER",
+                "defaultText": "{{CreatorsTable.selectedRow.trust_score}}",
+                "minNum": 0,
+                "maxNum": 1
+              },
+              {
+                "type": "SELECT_WIDGET",
+                "widgetName": "EditStatusSelect",
+                "label": "Status",
+                "options": [
+                  { "label": "Active", "value": "active" },
+                  { "label": "Inactive", "value": "inactive" },
+                  { "label": "Pending", "value": "pending" }
+                ],
+                "defaultOptionValue": "{{CreatorsTable.selectedRow.status}}"
+              },
+              {
+                "type": "CONTAINER_WIDGET",
+                "widgetName": "EditFormButtons",
+                "orientation": "horizontal",
+                "children": [
+                  {
+                    "type": "BUTTON_WIDGET",
+                    "widgetName": "DeleteCreatorButton",
+                    "text": "Delete",
+                    "buttonStyle": "DANGER",
+                    "onClick": "{{DeleteCreator.run().then(() => closeModal('EditCreatorModal'))}}"
+                  },
+                  {
+                    "type": "BUTTON_WIDGET",
+                    "widgetName": "CancelEditCreator",
+                    "text": "Cancel",
+                    "buttonStyle": "SECONDARY",
+                    "onClick": "{{closeModal('EditCreatorModal')}}"
+                  },
+                  {
+                    "type": "BUTTON_WIDGET",
+                    "widgetName": "SubmitEditCreator",
+                    "text": "Save Changes",
+                    "buttonStyle": "PRIMARY",
+                    "onClick": "{{UpdateCreator.run()}}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "Content": {
+      "ContentFilters": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "ContentFilters",
+        "orientation": "horizontal",
+        "children": [
+          {
+            "type": "SELECT_WIDGET",
+            "widgetName": "CreatorFilter",
+            "placeholderText": "Filter by creator",
+            "options": "{{[{label: 'All Creators', value: ''}, ...((GetCreators.data.creators || []).map(c => ({label: c.name, value: c.id})))]}}",
+            "defaultOptionValue": "",
+            "onOptionChange": "{{GetContent.run()}}"
+          },
+          {
+            "type": "SELECT_WIDGET",
+            "widgetName": "CategoryFilter",
+            "placeholderText": "Filter by category",
+            "options": [
+              { "label": "All Categories", "value": "" },
+              { "label": "Technology", "value": "technology" },
+              { "label": "Finance", "value": "finance" },
+              { "label": "Science", "value": "science" },
+              { "label": "Business", "value": "business" },
+              { "label": "Health", "value": "health" },
+              { "label": "Entertainment", "value": "entertainment" }
+            ],
+            "defaultOptionValue": "",
+            "onOptionChange": "{{GetContent.run()}}"
+          },
+          {
+            "type": "SELECT_WIDGET",
+            "widgetName": "ContentStatusFilter",
+            "placeholderText": "Filter by status",
+            "options": [
+              { "label": "All Status", "value": "" },
+              { "label": "Published", "value": "published" },
+              { "label": "Pending", "value": "pending" },
+              { "label": "Under Review", "value": "under_review" },
+              { "label": "Rejected", "value": "rejected" }
+            ],
+            "defaultOptionValue": "",
+            "onOptionChange": "{{GetContent.run()}}"
+          },
+          {
+            "type": "DATE_PICKER_WIDGET2",
+            "widgetName": "DateRangePicker",
+            "datePickerType": "DATE_RANGE",
+            "defaultStartDate": "{{moment().subtract(7, 'days').format('YYYY-MM-DD')}}",
+            "defaultEndDate": "{{moment().format('YYYY-MM-DD')}}",
+            "onDateSelected": "{{GetContent.run()}}"
+          }
+        ]
+      },
+      "ContentTable": {
+        "type": "TABLE_WIDGET_V2",
+        "widgetName": "ContentTable",
+        "tableData": "{{GetContent.data.content || []}}",
+        "primaryColumns": {
+          "title": {
+            "columnType": "text",
+            "alias": "Title",
+            "width": 300
+          },
+          "creator_name": {
+            "columnType": "text",
+            "alias": "Creator"
+          },
+          "content_type": {
+            "columnType": "text",
+            "alias": "Type"
+          },
+          "category": {
+            "columnType": "text",
+            "alias": "Category"
+          },
+          "relevance_score": {
+            "columnType": "number",
+            "alias": "Relevance",
+            "outputFormat": "0.00"
+          },
+          "sentiment": {
+            "columnType": "text",
+            "alias": "Sentiment",
+            "cellBackground": "{{currentRow.sentiment === 'positive' ? '#D4EDDA' : currentRow.sentiment === 'negative' ? '#F8D7DA' : '#FFF3CD'}}"
+          },
+          "status": {
+            "columnType": "text",
+            "alias": "Status"
+          },
+          "created_at": {
+            "columnType": "date",
+            "alias": "Created",
+            "inputFormat": "YYYY-MM-DDTHH:mm:ss",
+            "outputFormat": "MMM DD, HH:mm"
+          },
+          "actions": {
+            "columnType": "button",
+            "alias": "Actions",
+            "buttonLabel": "Review",
+            "onClick": "{{showModal('ContentReviewModal')}}"
+          }
+        },
+        "serverSidePagination": true,
+        "totalRecordsCount": "{{GetContent.data.total || 0}}",
+        "pageSize": 20,
+        "onPageChange": "{{GetContent.run()}}",
+        "isVisible": true
+      },
+      "ContentReviewModal": {
+        "type": "MODAL_WIDGET",
+        "widgetName": "ContentReviewModal",
+        "title": "Review Content",
+        "size": "MODAL_LARGE",
+        "children": [
+          {
+            "type": "TEXT_WIDGET",
+            "widgetName": "ContentTitle",
+            "text": "{{ContentTable.selectedRow.title}}",
+            "fontStyle": "BOLD",
+            "fontSize": "1.5rem"
+          },
+          {
+            "type": "TEXT_WIDGET",
+            "widgetName": "ContentSummary",
+            "text": "{{ContentTable.selectedRow.summary || 'No summary available'}}"
+          },
+          {
+            "type": "CONTAINER_WIDGET",
+            "widgetName": "ContentMeta",
+            "orientation": "horizontal",
+            "children": [
+              {
+                "type": "TEXT_WIDGET",
+                "widgetName": "ContentCreator",
+                "text": "Creator: {{ContentTable.selectedRow.creator_name}}"
+              },
+              {
+                "type": "TEXT_WIDGET",
+                "widgetName": "ContentType",
+                "text": "Type: {{ContentTable.selectedRow.content_type}}"
+              },
+              {
+                "type": "TEXT_WIDGET",
+                "widgetName": "ContentRelevance",
+                "text": "Relevance: {{ContentTable.selectedRow.relevance_score}}"
+              }
+            ]
+          },
+          {
+            "type": "TEXT_WIDGET",
+            "widgetName": "AIAnalysisTitle",
+            "text": "AI Analysis",
+            "fontStyle": "BOLD"
+          },
+          {
+            "type": "JSON_FORM_WIDGET",
+            "widgetName": "AIAnalysisDisplay",
+            "sourceData": "{{ContentTable.selectedRow.ai_analysis || {}}}",
+            "isReadOnly": true
+          },
+          {
+            "type": "SELECT_WIDGET",
+            "widgetName": "StatusActionSelect",
+            "label": "Update Status",
+            "options": [
+              { "label": "Publish", "value": "published" },
+              { "label": "Keep Pending", "value": "pending" },
+              { "label": "Reject", "value": "rejected" }
+            ],
+            "defaultOptionValue": "{{ContentTable.selectedRow.status}}"
+          },
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "ModerationNotesInput",
+            "label": "Moderation Notes",
+            "inputType": "MULTI_LINE_TEXT",
+            "placeholderText": "Add notes about this content..."
+          },
+          {
+            "type": "CONTAINER_WIDGET",
+            "widgetName": "ReviewButtons",
+            "orientation": "horizontal",
+            "children": [
+              {
+                "type": "BUTTON_WIDGET",
+                "widgetName": "CloseReviewModal",
+                "text": "Close",
+                "buttonStyle": "SECONDARY",
+                "onClick": "{{closeModal('ContentReviewModal')}}"
+              },
+              {
+                "type": "BUTTON_WIDGET",
+                "widgetName": "SubmitReview",
+                "text": "Update Status",
+                "buttonStyle": "PRIMARY",
+                "onClick": "{{UpdateContentStatus.run().then(() => closeModal('ContentReviewModal'))}}"
+              }
+            ]
+          }
+        ]
+      }
+    }
+    ,
+    "Observability": {
+      "ObsStats": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "ObsStats",
+        "columns": 4,
+        "orientation": "horizontal",
+        "children": [
+          {
+            "type": "STATBOX_WIDGET",
+            "widgetName": "ProcessorStatusStat",
+            "dynamicPropertyPathList": ["value", "iconColor"],
+            "value": "{{ Number(GetProcessorUp.data.data.result?.[0]?.value?.[1] || 0) === 1 ? 'UP' : 'DOWN' }}",
+            "label": "Processor",
+            "iconName": "pulse",
+            "iconColor": "{{ Number(GetProcessorUp.data.data.result?.[0]?.value?.[1] || 0) === 1 ? '#00B894' : '#E17055' }}"
+          },
+          {
+            "type": "STATBOX_WIDGET",
+            "widgetName": "EngineStatusStat",
+            "dynamicPropertyPathList": ["value", "iconColor"],
+            "value": "{{ Number(GetEngineUp.data.data.result?.[0]?.value?.[1] || 0) === 1 ? 'UP' : 'DOWN' }}",
+            "label": "Engine",
+            "iconName": "play",
+            "iconColor": "{{ Number(GetEngineUp.data.data.result?.[0]?.value?.[1] || 0) === 1 ? '#00B894' : '#E17055' }}"
+          },
+          {
+            "type": "STATBOX_WIDGET",
+            "widgetName": "ExportersDownStat",
+            "dynamicPropertyPathList": ["value", "iconColor"],
+            "value": "{{ Number(GetExportersDown.data.data.result?.[0]?.value?.[1] || 0) }}",
+            "label": "Exporters Down",
+            "iconName": "warning-sign",
+            "iconColor": "{{ Number(GetExportersDown.data.data.result?.[0]?.value?.[1] || 0) > 0 ? '#E17055' : '#00B894' }}"
+          },
+          {
+            "type": "STATBOX_WIDGET",
+            "widgetName": "ProcessingP95Stat",
+            "dynamicPropertyPathList": ["value"],
+            "value": "{{ (Number(GetProcessingP95.data.data.result?.[0]?.value?.[1] || 0)).toFixed(2) + 's' }}",
+            "label": "P95 Processing",
+            "iconName": "time",
+            "iconColor": "#6C5CE7"
+          }
+        ]
+      },
+      "ErrorRateChart": {
+        "type": "CHART_WIDGET",
+        "widgetName": "ErrorRateChart",
+        "chartType": "AREA_CHART",
+        "chartName": "Processor Error Rate (5m)",
+        "chartData": "{{ (GetErrorRateTS.data.data.result?.[0]?.values || []).map(v => ({ time: moment.unix(v[0]).format('HH:mm'), rate: Number(v[1]) })) }}",
+        "xAxisName": "time",
+        "yAxisName": "rate",
+        "customFusionChartConfig": {
+          "type": "area2d",
+          "dataSource": {
+            "chart": {
+              "theme": "fusion",
+              "yAxisName": "Error Rate",
+              "numberSuffix": "",
+              "showLegend": "0"
+            }
+          }
+        }
+      },
+      "TargetsTable": {
+        "type": "TABLE_WIDGET_V2",
+        "widgetName": "TargetsTable",
+        "tableData": "{{ (GetTargets.data.data.activeTargets || []).map(t => ({ job: t.labels?.job, instance: t.discoveredLabels?.__address__ || t.labels?.instance, health: t.health, lastError: t.lastError || '', lastScrape: t.lastScrape, lastScrapeDuration: t.lastScrapeDuration })) }}",
+        "primaryColumns": {
+          "job": { "columnType": "text", "alias": "Job", "width": 200 },
+          "instance": { "columnType": "text", "alias": "Instance", "width": 300 },
+          "health": { "columnType": "text", "alias": "Health" },
+          "lastScrape": { "columnType": "text", "alias": "Last Scrape" },
+          "lastScrapeDuration": { "columnType": "text", "alias": "Duration" },
+          "lastError": { "columnType": "text", "alias": "Last Error" }
+        },
+        "pageSize": 10,
+        "isVisible": true,
+        "animateLoading": true
+      },
+      "GrafanaPanel": {
+        "type": "IFRAME_WIDGET",
+        "widgetName": "GrafanaPanel",
+        "url": "{{ appsmith.config.GRAFANA_DASHBOARD_URL || 'http://localhost:3001/d/news-feed-observability-public/news-feed-observability-public?orgId=1&kiosk' }}",
+        "height": 600,
+        "isVisible": "{{ !!appsmith.config.GRAFANA_DASHBOARD_URL }}",
+        "borderRadius": "4px"
+      },
+      "ObsRefreshButton": {
+        "type": "BUTTON_WIDGET",
+        "widgetName": "ObsRefreshButton",
+        "text": "Refresh",
+        "buttonStyle": "SECONDARY",
+        "onClick": "{{GetProcessorUp.run(); GetEngineUp.run(); GetExportersDown.run(); GetErrorRate.run(); GetProcessingP95.run(); GetErrorRateTS.run(); GetTargets.run();}}"
+      },
+      "ObsErrorMessage": {
+        "type": "TEXT_WIDGET",
+        "widgetName": "ObsErrorMessage",
+        "text": "{{ GetProcessorUp.isError || GetEngineUp.isError || GetTargets.isError ? 'Unable to connect to Prometheus. Check your PROMETHEUS_BASE_URL configuration.' : '' }}",
+        "textColor": "#E17055",
+        "isVisible": "{{ GetProcessorUp.isError || GetEngineUp.isError || GetTargets.isError }}"
+      }
+    }
+  }
+}

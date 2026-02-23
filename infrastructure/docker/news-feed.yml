@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  # News Feed Engine Stack
+  news-feed-processor:
+    image: elevatediq-news-feed:${VERSION:-latest}
+    build:
+      context: ../../services/news-feed-engine
+      dockerfile: Dockerfile.enhanced
+    container_name: elevatediq-news-feed-processor
+    networks:
+      - elevatediq-app
+      - elevatediq-data
+      - elevatediq-monitoring
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - REDIS_URL=redis://elevatediq-redis-01:6379
+      - DATABASE_URL=postgresql://elevatediq:${DB_PASSWORD}@elevatediq-postgres-01:5432/elevatediq
+      - PROCESSING_WORKERS=${NEWS_FEED_WORKERS:-4}
+      - BATCH_SIZE=${NEWS_FEED_BATCH_SIZE:-100}
+    volumes:
+      - news-feed-cache:/var/cache/news-feed
+      - news-feed-logs:/var/log/news-feed
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://news-feed:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    labels:
+      - com.elevatediq.service=news-feed-processor
+      - com.elevatediq.category=application
+      - com.elevatediq.owner=platform-team
+      - traefik.enable=true
+      - traefik.http.routers.news-feed.rule=Host(`news-feed.elevatediq.ai`)
+      - traefik.http.services.news-feed.loadbalancer.server.port=3000
+
+  news-feed-aggregator:
+    image: elevatediq-news-feed:${VERSION:-latest}
+    build:
+      context: ../../services/news-feed-engine/processor
+      dockerfile: Dockerfile
+    container_name: elevatediq-news-feed-aggregator
+    networks:
+      - elevatediq-app
+      - elevatediq-data
+    environment:
+      - SERVICE_MODE=aggregator
+      - AGGREGATION_INTERVAL=${AGG_INTERVAL:-60}
+      - SOURCE_FEEDS=${NEWS_SOURCES:-rss,api,websocket}
+    volumes:
+      - news-feed-raw:/var/data/raw-feeds
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://news-feed-api:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - news-feed-processor
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    labels:
+      - com.elevatediq.service=news-feed-aggregator
+      - com.elevatediq.category=application
+      - com.elevatediq.owner=platform-team
+
+  news-feed-api:
+    image: elevatediq-news-feed:${VERSION:-latest}
+    build:
+      context: ../../services/news-feed-engine
+      dockerfile: Dockerfile
+    container_name: elevatediq-news-feed-api
+    networks:
+      - elevatediq-public
+      - elevatediq-app
+      - elevatediq-data
+    environment:
+      - API_MODE=rest
+      - RATE_LIMIT=${NEWS_FEED_RATE_LIMIT:-1000}
+      - CACHE_TTL=${NEWS_FEED_CACHE_TTL:-300}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://news-feed-backend:8080/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    labels:
+      - com.elevatediq.service=news-feed-api
+      - com.elevatediq.category=api
+      - com.elevatediq.owner=platform-team
+      - traefik.enable=true
+      - traefik.http.routers.news-feed-api.rule=Host(`api.elevatediq.ai`) && PathPrefix(`/news-feed`)
+      - traefik.http.services.news-feed-api.loadbalancer.server.port=8080
+
+networks:
+  elevatediq-app:
+    external: true
+  elevatediq-data:
+    external: true
+  elevatediq-public:
+    external: true
+  elevatediq-monitoring:
+    external: true
+
+volumes:
+  news-feed-cache:
+    name: elevatediq-news-feed-cache
+  news-feed-logs:
+    name: elevatediq-news-feed-logs
+  news-feed-raw:
+    name: elevatediq-news-feed-raw

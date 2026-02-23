@@ -1,0 +1,223 @@
+groups:
+  - name: news-feed-engine-alerts
+    rules:
+      # Service Health Alerts
+      - alert: NewsFeedEngineDown
+        expr: up{job="news-feed-engine"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: news-feed-engine
+        annotations:
+          summary: "News Feed Engine API is down"
+          description: "News Feed Engine API has been unreachable for more than 1 minute."
+          runbook_url: "https://docs.elevatediq.com/runbooks/news-feed-engine-down"
+
+      - alert: NewsFeedProcessorDown
+        expr: up{job="news-feed-processor"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: news-feed-processor
+        annotations:
+          summary: "News Feed ML Processor is down"
+          description: "News Feed ML Processor has been unreachable for more than 2 minutes."
+          runbook_url: "https://docs.elevatediq.com/runbooks/news-feed-processor-down"
+
+      # Latency Alerts
+      - alert: NewsFeedHighLatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="news-feed-engine"}[5m])) by (le)) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: news-feed-engine
+        annotations:
+          summary: "High API latency detected"
+          description: "95th percentile latency is above 2 seconds for the past 5 minutes. Current value: {{ $value }}s"
+
+      - alert: NewsFeedCriticalLatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="news-feed-engine"}[5m])) by (le)) > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: news-feed-engine
+        annotations:
+          summary: "Critical API latency detected"
+          description: "95th percentile latency is above 5 seconds. Current value: {{ $value }}s"
+
+      # Error Rate Alerts
+      - alert: NewsFeedHighErrorRate
+        expr: sum(rate(http_requests_total{job="news-feed-engine",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="news-feed-engine"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: news-feed-engine
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for the past 5 minutes. Current value: {{ $value | humanizePercentage }}"
+
+      - alert: NewsFeedCriticalErrorRate
+        expr: sum(rate(http_requests_total{job="news-feed-engine",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="news-feed-engine"}[5m])) > 0.15
+        for: 2m
+        labels:
+          severity: critical
+          service: news-feed-engine
+        annotations:
+          summary: "Critical error rate detected"
+          description: "Error rate is above 15%. Current value: {{ $value | humanizePercentage }}"
+
+      # Processing Alerts
+      - alert: NewsFeedProcessingQueueHigh
+        expr: news_feed_processing_queue_size > 500
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "Processing queue is backing up"
+          description: "Processing queue has more than 500 items for over 10 minutes. Current: {{ $value }} items"
+
+      - alert: NewsFeedProcessingQueueCritical
+        expr: news_feed_processing_queue_size > 2000
+        for: 5m
+        labels:
+          severity: critical
+          service: news-feed-processor
+        annotations:
+          summary: "Processing queue is critically backed up"
+          description: "Processing queue has more than 2000 items. Current: {{ $value }} items. Immediate action required."
+
+      - alert: NewsFeedProcessingErrors
+        expr: increase(news_feed_processing_errors_total[15m]) > 10
+        for: 0m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "Multiple processing errors detected"
+          description: "More than 10 processing errors in the last 15 minutes. Count: {{ $value }}"
+
+      # AI Processing Alerts
+      - alert: NewsFeedAILatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(news_feed_ai_analysis_duration_seconds_bucket[5m])) by (le)) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "AI analysis taking too long"
+          description: "95th percentile AI analysis latency is above 30 seconds. Current: {{ $value }}s"
+
+      - alert: NewsFeedAIErrors
+        expr: increase(news_feed_ai_errors_total[15m]) > 5
+        for: 0m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "AI processing errors detected"
+          description: "{{ $value }} AI processing errors in the last 15 minutes. Check Claude API status."
+
+      # Kafka Alerts
+      - alert: NewsFeedKafkaConsumerLagHigh
+        expr: kafka_consumer_group_lag{topic=~"news-feed.*"} > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "Kafka consumer lag is high"
+          description: "Consumer lag for topic {{ $labels.topic }} is above 1000. Current: {{ $value }}"
+
+      - alert: NewsFeedKafkaConsumerLagCritical
+        expr: kafka_consumer_group_lag{topic=~"news-feed.*"} > 5000
+        for: 5m
+        labels:
+          severity: critical
+          service: news-feed-processor
+        annotations:
+          summary: "Kafka consumer lag is critical"
+          description: "Consumer lag for topic {{ $labels.topic }} is above 5000. Current: {{ $value }}. Data freshness at risk."
+
+      - alert: NewsFeedDLQGrowing
+        expr: increase(kafka_topic_messages_total{topic="news-feed-dlq"}[1h]) > 10
+        for: 0m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "Dead letter queue is growing"
+          description: "{{ $value }} messages sent to DLQ in the last hour. Investigate failed messages."
+
+      # Database Alerts
+      - alert: NewsFeedDBConnectionsHigh
+        expr: pg_stat_activity_count{datname="elevatediq_news_feed"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: news-feed-engine
+        annotations:
+          summary: "High database connection count"
+          description: "Database has {{ $value }} active connections. Pool may be exhausted soon."
+
+      - alert: NewsFeedDBQuerySlow
+        expr: histogram_quantile(0.95, sum(rate(news_feed_db_query_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-engine
+        annotations:
+          summary: "Slow database queries detected"
+          description: "95th percentile query latency is above 1 second. Current: {{ $value }}s"
+
+      - alert: NewsFeedDBSizeGrowing
+        expr: predict_linear(pg_database_size_bytes{datname="elevatediq_news_feed"}[7d], 30*24*60*60) > 100*1024*1024*1024
+        for: 1h
+        labels:
+          severity: warning
+          service: news-feed-engine
+        annotations:
+          summary: "Database size growing rapidly"
+          description: "At current growth rate, database will exceed 100GB in 30 days. Consider archiving old data."
+
+      # Resource Alerts
+      - alert: NewsFeedHighMemoryUsage
+        expr: container_memory_usage_bytes{container="news-feed-engine"} / container_spec_memory_limit_bytes{container="news-feed-engine"} > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-engine
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is above 85%. Current: {{ $value | humanizePercentage }}"
+
+      - alert: NewsFeedHighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{container="news-feed-engine"}[5m]) / container_spec_cpu_quota{container="news-feed-engine"} * container_spec_cpu_period{container="news-feed-engine"} > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-engine
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 85%. Current: {{ $value | humanizePercentage }}"
+
+      # Business Metrics Alerts
+      - alert: NewsFeedLowContentThroughput
+        expr: increase(news_feed_content_processed_total[1h]) < 10
+        for: 2h
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "Low content processing throughput"
+          description: "Less than 10 items processed per hour for the past 2 hours. Check content sources."
+
+      - alert: NewsFeedHighRejectionRate
+        expr: increase(news_feed_content_rejected_total[1h]) / (increase(news_feed_content_processed_total[1h]) + 0.1) > 0.3
+        for: 1h
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "High content rejection rate"
+          description: "More than 30% of content is being rejected. Review moderation settings."

@@ -1,0 +1,13 @@
+# Minimal Alertmanager configuration for development
+# Routes all alerts to a blackhole receiver to avoid external notifications in dev.
+
+global: {}
+
+route:
+  receiver: 'blackhole'
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 3h
+
+receivers:
+  - name: 'blackhole'

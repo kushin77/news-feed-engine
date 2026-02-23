@@ -1,0 +1,12 @@
+# Grafana dashboard provisioning for News Feed Processor
+apiVersion: 1
+providers:
+  - name: 'News Feed Processor'
+    orgId: 1
+    folder: 'News Feed'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/processor
+      foldersFromFilesStructure: true

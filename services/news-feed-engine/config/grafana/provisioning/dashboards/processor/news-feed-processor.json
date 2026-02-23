@@ -1,0 +1,283 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.2.2" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "8.5.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "2.0.0" }
+  ],
+  "title": "News Feed Processor",
+  "uid": "news-feed-processor",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["news-feed", "processor"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h"]
+  },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Messages Processed (rate)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(status, platform) (rate(news_feed_messages_processed_total[5m]))",
+          "legendFormat": "{{status}} - {{platform}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Processing Time (avg seconds)",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(platform) (rate(news_feed_processing_seconds_sum[5m])) / sum by(platform) (rate(news_feed_processing_seconds_count[5m]))",
+          "legendFormat": "{{platform}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "AI Analysis Time (avg seconds)",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(news_feed_ai_analysis_seconds_sum[5m]) / rate(news_feed_ai_analysis_seconds_count[5m])",
+          "legendFormat": "AI Analysis"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Embedding Time (avg seconds)",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(news_feed_embedding_seconds_sum[5m]) / rate(news_feed_embedding_seconds_count[5m])",
+          "legendFormat": "Embeddings"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors (rate)",
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(platform) (rate(news_feed_messages_processed_total{status=\"error\"}[5m]))",
+          "legendFormat": "{{platform}}"
+        }
+      ]
+    }
+    ,
+    {
+      "type": "stat",
+      "title": "Error Rate (5m)",
+      "gridPos": { "x": 0, "y": 24, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "percentChangeColorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.02 },
+              { "color": "red", "value": 0.05 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * job:news_feed:processor_error_rate5m"
+        }
+      ]
+    }
+    ,
+    {
+      "type": "stat",
+      "title": "P95 Processing (s)",
+      "gridPos": { "x": 6, "y": 24, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "horizontal",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 3 },
+              { "color": "red", "value": 6 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "job:news_feed:processing_p95_seconds"
+        }
+      ]
+    }
+    ,
+    {
+      "type": "stat",
+      "title": "P99 Processing (s)",
+      "gridPos": { "x": 12, "y": 24, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "horizontal",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 6 },
+              { "color": "red", "value": 8 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "job:news_feed:processing_p99_seconds"
+        }
+      ]
+    }
+    ,
+    {
+      "type": "stat",
+      "title": "Consumer Lag (processor)",
+      "gridPos": { "x": 18, "y": 24, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "horizontal",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 5000 },
+              { "color": "red", "value": 10000 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(kafka_consumergroup_lag{consumergroup=\"news-feed-processor\"})"
+        }
+      ]
+    }
+    ,
+    {
+      "type": "stat",
+      "title": "P95 AI Analysis (s)",
+      "gridPos": { "x": 0, "y": 30, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "horizontal",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 4 },
+              { "color": "red", "value": 8 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        { "refId": "A", "expr": "job:news_feed:ai_analysis_p95_seconds" }
+      ]
+    }
+    ,
+    {
+      "type": "stat",
+      "title": "P95 Embedding (s)",
+      "gridPos": { "x": 6, "y": 30, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "horizontal",
+        "colorMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 4 },
+              { "color": "red", "value": 8 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        { "refId": "A", "expr": "job:news_feed:embedding_p95_seconds" }
+      ]
+    }
+  ]
+}

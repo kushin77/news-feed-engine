@@ -1,0 +1,347 @@
+# Default values for news-feed-engine
+# This is a YAML-formatted file.
+
+# Image configuration
+image:
+  repository: gcr.io/elevatediq/news-feed-engine
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Replica configuration
+replicaCount: 3
+
+# Service account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Pod annotations
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/path: "/metrics"
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# Service configuration
+service:
+  type: ClusterIP
+  ports:
+    http: 8080
+    processor: 8081
+    metrics: 9090
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    - host: news-feed.elevatediq.ai
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: news-feed-tls
+      hosts:
+        - news-feed.elevatediq.ai
+
+# Resource limits
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+# Autoscaling configuration
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+    scaleUp:
+      stabilizationWindowSeconds: 0
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: news-feed-engine
+          topologyKey: kubernetes.io/hostname
+
+# Topology spread constraints
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: topology.kubernetes.io/zone
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: news-feed-engine
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Liveness probe
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 15
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Readiness probe
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Environment configuration
+env:
+  ELEVATEDIQ_ENVIRONMENT: production
+  LOG_LEVEL: info
+  PORT: "8080"
+  PROCESSOR_PORT: "8081"
+  METRICS_PORT: "9090"
+
+# Secrets configuration (references to external secrets)
+secrets:
+  anthropicApiKey:
+    secretName: news-feed-secrets
+    key: ANTHROPIC_API_KEY
+  openaiApiKey:
+    secretName: news-feed-secrets
+    key: OPENAI_API_KEY
+  elevenlabsApiKey:
+    secretName: news-feed-secrets
+    key: ELEVENLABS_API_KEY
+  didApiKey:
+    secretName: news-feed-secrets
+    key: DID_API_KEY
+
+# Database configuration
+database:
+  host: elevatediq-postgres
+  port: 5432
+  name: news_feed
+  sslMode: require
+  existingSecret: news-feed-db-secret
+  existingSecretUserKey: username
+  existingSecretPasswordKey: password
+
+# Redis configuration
+redis:
+  host: elevatediq-redis
+  port: 6379
+  db: 1
+
+# Kafka configuration
+kafka:
+  bootstrapServers: elevatediq-kafka:9092
+  consumerGroup: news-feed-engine
+  topics:
+    input: news-feed-raw-content
+    output: news-feed-processed-content
+    video: news-feed-video-jobs
+    analytics: news-feed-analytics-events
+    trends: news-feed-trends
+    agents: news-feed-agent-messages
+
+# Media Manager configuration
+mediaManager:
+  url: http://media-manager:8080
+  cdnUrl: https://cdn.elevatediq.ai
+
+# AI configuration
+ai:
+  claude:
+    model: claude-3-5-sonnet-20241022
+    maxTokens: 4096
+  embedding:
+    model: text-embedding-3-small
+  elevenlabs:
+    baseUrl: https://api.elevenlabs.io/v1
+    defaultVoice: professional
+  did:
+    baseUrl: https://api.d-id.com
+    defaultAvatar: professional_anchor
+
+# Elite AI Agents configuration
+agents:
+  enabled: true
+  orchestrationMode: autonomous
+  agents:
+    - name: content_curator
+      enabled: true
+      concurrency: 2
+    - name: video_producer
+      enabled: true
+      concurrency: 1
+    - name: distributor
+      enabled: true
+      concurrency: 3
+    - name: analyst
+      enabled: true
+      concurrency: 1
+    - name: engagement
+      enabled: true
+      concurrency: 2
+
+# Trend Sources configuration
+trendSources:
+  enabled: true
+  sources:
+    googleTrends:
+      enabled: true
+      refreshInterval: 300s
+    twitter:
+      enabled: true
+      refreshInterval: 60s
+    reddit:
+      enabled: true
+      refreshInterval: 120s
+    youtube:
+      enabled: true
+      refreshInterval: 300s
+    newsApi:
+      enabled: true
+      refreshInterval: 180s
+    tiktok:
+      enabled: true
+      refreshInterval: 120s
+
+# Analytics Pipeline configuration
+analytics:
+  enabled: true
+  kafka:
+    batchSize: 100
+    lingerMs: 10
+  prometheus:
+    enabled: true
+    port: 9090
+  grafana:
+    enabled: true
+    dashboardAutoProvision: true
+
+# OAuth configuration
+oauth:
+  enabled: true
+  tokenEncryption:
+    enabled: true
+    secretName: oauth-encryption-key
+  providers:
+    - name: youtube
+      enabled: true
+    - name: tiktok
+      enabled: true
+    - name: linkedin
+      enabled: true
+    - name: instagram
+      enabled: true
+    - name: twitter
+      enabled: true
+    - name: facebook
+      enabled: true
+    - name: pinterest
+      enabled: true
+    - name: snapchat
+      enabled: true
+
+# Prometheus ServiceMonitor
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {}
+  additionalMetrics:
+    - content_events_total
+    - content_views_total
+    - content_engagement_total
+    - agent_tasks_processed
+    - trend_sources_fetched
+    - video_generation_duration
+
+# External dependencies (using external services)
+externalPostgresql:
+  enabled: false  # Using external PostgreSQL
+
+externalRedis:
+  enabled: false  # Using external Redis
+
+externalKafka:
+  enabled: false  # Using external Kafka
+
+# Network policy
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: elevatediq
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: elevatediq
+      ports:
+        - protocol: TCP
+          port: 5432
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 9092
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443

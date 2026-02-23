@@ -1,0 +1,77 @@
+# Recording rules to optimize common queries and SLOs
+
+groups:
+  - name: news-feed-processor-recording
+    interval: 30s
+    rules:
+      # Error rate over 5 minutes (ratio)
+      - record: job:news_feed:processor_error_rate5m
+        expr: |
+          sum(rate(news_feed_messages_processed_total{status="error"}[5m]))
+            /
+          sum(rate(news_feed_messages_processed_total[5m]))
+
+      # P95/P99 processing latency per platform
+      - record: job:news_feed:processing_p95_seconds
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, platform) (rate(news_feed_processing_seconds_bucket[5m]))
+          )
+      - record: job:news_feed:processing_p99_seconds
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (le, platform) (rate(news_feed_processing_seconds_bucket[5m]))
+          )
+
+      # P95 AI analysis time
+      - record: job:news_feed:ai_analysis_p95_seconds
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(news_feed_ai_analysis_seconds_bucket[5m]))
+          )
+
+      # P95 embedding time
+      - record: job:news_feed:embedding_p95_seconds
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(news_feed_embedding_seconds_bucket[5m]))
+          )
+
+  - name: news-feed-availability-recording
+    interval: 30s
+    rules:
+      # Success rate for processor over 5m
+      - record: job:news_feed:processor_success_rate5m
+        expr: |
+          sum(rate(news_feed_messages_processed_total{status="success"}[5m]))
+            /
+          sum(rate(news_feed_messages_processed_total[5m]))
+
+      # Service availability (percentage)
+      - record: job:news_feed:service_availability
+        expr: |
+          avg(up{job=~"news-feed-engine|news-feed-processor"}) * 100
+
+      # Blackbox probe success rate (HTTP endpoints)
+      - record: job:news_feed:http_probe_success_rate
+        expr: |
+          avg(probe_success{job="blackbox-http"})
+
+      # Kafka exporter availability
+      - record: job:news_feed:kafka_availability
+        expr: |
+          avg(up{job="kafka-exporter"})
+
+      # Postgres availability
+      - record: job:news_feed:postgres_availability
+        expr: |
+          avg(pg_up)
+
+      # Redis availability
+      - record: job:news_feed:redis_availability
+        expr: |
+          avg(redis_up)

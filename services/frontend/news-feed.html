@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="News Feed Engine - AI-powered content aggregation platform with multi-platform ingestion, intelligent analysis, and automated publishing">
+    <meta name="keywords" content="news aggregation, content discovery, AI analysis, video generation, semantic search, multi-platform publishing">
+    <meta name="theme-color" content="#0F172A">
+    <meta property="og:title" content="News Feed Engine | ElevatedIQ">
+    <meta property="og:description" content="AI-powered news aggregation with semantic search, automated video generation, and cross-platform publishing">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://dev.elevatediq.ai/og-news-feed.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="News Feed Engine | ElevatedIQ">
+    <meta name="twitter:description" content="Aggregate, analyze, and distribute content at scale with AI">
+    <link rel="canonical" href="https://dev.elevatediq.ai/news-feed">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <title>News Feed Engine | ElevatedIQ - AI-Powered Content Aggregation</title>
+
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "ElevatedIQ News Feed Engine",
+      "applicationCategory": "ContentManagementSystem",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "127"
+      }
+    }
+    </script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX', {
+            page_path: '/news-feed'
+        });
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --slate-950: #020617;
+            --slate-900: #0F172A;
+            --slate-800: #1E293B;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748B;
+            --slate-400: #94A3B8;
+            --slate-300: #CBD5E1;
+            --slate-200: #E2E8F0;
+            --slate-100: #F1F5F9;
+            --white: #FFFFFF;
+            --purple-500: #8B5CF6;
+            --purple-600: #7C3AED;
+            --blue-500: #3B82F6;
+            --green-500: #10B981;
+            --orange-500: #F97316;
+            --red-500: #EF4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--slate-200);
+            background: linear-gradient(180deg, var(--slate-950) 0%, var(--slate-900) 100%);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+        }
+
+        .nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--slate-300);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--purple-500);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--purple-600) 0%, var(--blue-500) 100%);
+            color: var(--white);
+            padding: 0.75rem 1.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Hero */
+        .hero {
+            padding: 10rem 3rem 5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            background: linear-gradient(135deg, var(--green-500) 0%, var(--blue-500) 100%);
+            color: var(--white);
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, var(--purple-500) 0%, var(--blue-500) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.35rem;
+            color: var(--slate-400);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            line-height: 1.8;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-large {
+            padding: 1.25rem 3rem;
+            font-size: 1.1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple-600) 0%, var(--blue-500) 100%);
+            color: var(--white);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--white);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.15);
+            border-color: var(--purple-500);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 5rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--purple-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--slate-400);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 5rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            padding: 2.5rem;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--purple-500);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            color: var(--slate-400);
+            line-height: 1.8;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 1.5rem;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.75rem;
+            position: relative;
+            color: var(--slate-300);
+        }
+
+        .feature-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--purple-500);
+            font-size: 1.5rem;
+            line-height: 1.2;
+        }
+
+        /* Architecture Diagram */
+        .architecture-section {
+            padding: 5rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .architecture-diagram {
+            background: rgba(148, 163, 184, 0.05);
+            border-radius: 1rem;
+            padding: 3rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .diagram-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .diagram-box {
+            flex: 1;
+            padding: 1.5rem;
+            background: rgba(139, 92, 246, 0.1);
+            border: 2px solid var(--purple-500);
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .diagram-box h4 {
+            color: var(--white);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .diagram-box p {
+            color: var(--slate-400);
+            font-size: 0.9rem;
+        }
+
+        .diagram-arrow {
+            text-align: center;
+            color: var(--purple-500);
+            font-size: 2rem;
+            margin: 1rem 0;
+        }
+
+        /* Social Media Integration */
+        .social-section {
+            padding: 5rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .social-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            transition: all 0.3s ease;
+            font-size: 2rem;
+        }
+
+        .social-icon:hover {
+            transform: translateY(-5px) scale(1.1);
+            border-color: var(--purple-500);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 5rem 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+            border-radius: 2rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-section p {
+            font-size: 1.25rem;
+            color: var(--slate-400);
+            margin-bottom: 3rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--slate-900);
+            border-top: 1px solid rgba(148, 163, 184, 0.08);
+            padding: 4rem 3rem 2rem;
+            margin-top: 5rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--slate-400);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--purple-500);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.08);
+            text-align: center;
+            color: var(--slate-500);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .diagram-row {
+                flex-direction: column;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <span style="font-size: 2rem;">⚡</span>
+                <span>ElevatedIQ</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/#products">Products</a></li>
+                <li><a href="/products">All Products</a></li>
+                <li><a href="https://elevatediq.ai/blog.html" target="_blank">News & Blog</a></li>
+            </ul>
+            <a href="#start" class="cta-button">Get Started</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-badge">🆕 Now Available - Version 2.0</div>
+        <h1>
+            News Feed Engine<br>
+            <span class="gradient-text">AI-Powered Content at Scale</span>
+        </h1>
+        <p>
+            Aggregate content from 12+ platforms, analyze with Claude AI, generate videos autonomously, and publish everywhere. Built for media organizations that need to move fast.
+        </p>
+        <div class="hero-cta">
+            <a href="#demo" class="btn-large btn-primary">Request Demo</a>
+            <a href="https://elevatediq.ai/blog.html" target="_blank" class="btn-large btn-secondary">View Live Blog</a>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">10K+</div>
+                <div class="stat-label">Articles Processed Daily</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12+</div>
+                <div class="stat-label">Publishing Platforms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Autonomous AI Agents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">< 2s</div>
+                <div class="stat-label">Search Response Time</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <h2 class="section-title">Core Capabilities</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Multi-Platform Ingestion</h3>
+                <p>Aggregate content from YouTube, Twitter/X, Reddit, RSS feeds, TikTok, and LinkedIn automatically.</p>
+                <ul class="feature-list">
+                    <li>YouTube Data API v3</li>
+                    <li>Twitter/X API v2</li>
+                    <li>Reddit API</li>
+                    <li>RSS/Atom parsers</li>
+                    <li>TikTok Content API</li>
+                    <li>LinkedIn API</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-Powered Analysis</h3>
+                <p>Claude AI analyzes every piece of content for sentiment, quality, categorization, and relevance.</p>
+                <ul class="feature-list">
+                    <li>Sentiment analysis</li>
+                    <li>Entity extraction</li>
+                    <li>Topic classification</li>
+                    <li>Quality scoring</li>
+                    <li>Duplicate detection</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Semantic Search</h3>
+                <p>Vector embeddings with pgvector enable intelligent content discovery and recommendations.</p>
+                <ul class="feature-list">
+                    <li>Natural language queries</li>
+                    <li>Similarity search</li>
+                    <li>Context-aware results</li>
+                    <li>Multi-language support</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎥</div>
+                <h3>Autonomous Video Generation</h3>
+                <p>End-to-end video production with ElevenLabs voice and D-ID avatars for automated content creation.</p>
+                <ul class="feature-list">
+                    <li>Script generation</li>
+                    <li>Voice synthesis (ElevenLabs)</li>
+                    <li>Avatar animation (D-ID)</li>
+                    <li>Automatic publishing</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Predictive Engine</h3>
+                <p>AI-powered performance prediction and trend surfing to maximize content ROI.</p>
+                <ul class="feature-list">
+                    <li>Virality modeling</li>
+                    <li>Trend forecasting</li>
+                    <li>Audience matching</li>
+                    <li>Timing optimization</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>Cross-Platform Publishing</h3>
+                <p>Automated distribution to 12+ platforms with platform-specific optimization.</p>
+                <ul class="feature-list">
+                    <li>Instagram & Facebook</li>
+                    <li>Twitter/X & Threads</li>
+                    <li>LinkedIn & Pinterest</li>
+                    <li>TikTok & YouTube</li>
+                    <li>Snapchat & more</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="architecture-section">
+        <h2 class="section-title">Platform Architecture</h2>
+        <div class="architecture-diagram">
+            <div class="diagram-row">
+                <div class="diagram-box">
+                    <h4>Content Sources</h4>
+                    <p>YouTube, Twitter, RSS, TikTok, LinkedIn, Reddit</p>
+                </div>
+                <div class="diagram-box">
+                    <h4>Ingestion Layer</h4>
+                    <p>Real-time aggregation & deduplication</p>
+                </div>
+            </div>
+            <div class="diagram-arrow">↓</div>
+            <div class="diagram-row">
+                <div class="diagram-box">
+                    <h4>AI Processing</h4>
+                    <p>Claude analysis, embeddings, categorization</p>
+                </div>
+                <div class="diagram-box">
+                    <h4>Video Factory</h4>
+                    <p>ElevenLabs + D-ID autonomous production</p>
+                </div>
+            </div>
+            <div class="diagram-arrow">↓</div>
+            <div class="diagram-row">
+                <div class="diagram-box">
+                    <h4>Storage</h4>
+                    <p>PostgreSQL + pgvector + Redis cache</p>
+                </div>
+                <div class="diagram-box">
+                    <h4>Analytics</h4>
+                    <p>Kafka + Prometheus + Grafana</p>
+                </div>
+            </div>
+            <div class="diagram-arrow">↓</div>
+            <div class="diagram-row">
+                <div class="diagram-box">
+                    <h4>Distribution</h4>
+                    <p>12+ platform publishers with OAuth</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="social-section">
+        <h2 class="section-title">Connected Platforms</h2>
+        <p style="color: var(--slate-400); font-size: 1.2rem; margin-bottom: 2rem;">
+            Publish to all major social media platforms with a single click
+        </p>
+        <div class="social-icons">
+            <div class="social-icon" title="Instagram">📷</div>
+            <div class="social-icon" title="Facebook">👥</div>
+            <div class="social-icon" title="Twitter/X">🐦</div>
+            <div class="social-icon" title="LinkedIn">💼</div>
+            <div class="social-icon" title="TikTok">🎵</div>
+            <div class="social-icon" title="YouTube">📺</div>
+            <div class="social-icon" title="Pinterest">📌</div>
+            <div class="social-icon" title="Snapchat">👻</div>
+            <div class="social-icon" title="Threads">🧵</div>
+            <div class="social-icon" title="Reddit">🤖</div>
+            <div class="social-icon" title="Google Business">🏢</div>
+            <div class="social-icon" title="WhatsApp">💬</div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <h2>Ready to Transform Your Content Strategy?</h2>
+        <p>Join leading media organizations using News Feed Engine to aggregate, analyze, and distribute content at scale.</p>
+        <div style="display: flex; gap: 1.5rem; justify-content: center;">
+            <a href="#demo" class="btn-large btn-primary">Schedule Demo</a>
+            <a href="https://elevatediq.ai/blog.html" target="_blank" class="btn-large btn-secondary">View Live Example</a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Products</h3>
+                <ul class="footer-links">
+                    <li><a href="/fort-knox">Fort Knox Security</a></li>
+                    <li><a href="/news-feed">News Feed Engine</a></li>
+                    <li><a href="/marketing">Marketing Manager AI</a></li>
+                    <li><a href="/devops">DevOps Suite</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="https://elevatediq.ai/blog.html" target="_blank">News & Blog</a></li>
+                    <li><a href="/docs">Documentation</a></li>
+                    <li><a href="/api">API Reference</a></li>
+                    <li><a href="/support">Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <ul class="footer-links">
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="https://instagram.com/elevatediq" target="_blank">Instagram</a></li>
+                    <li><a href="https://twitter.com/elevatediq" target="_blank">Twitter</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/security">Security</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 ElevatedIQ. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Analytics tracking
+        gtag('event', 'page_view', {
+            page_title: 'News Feed Engine',
+            page_location: window.location.href
+        });
+
+        // Track CTA clicks
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+            btn.addEventListener('click', () => {
+                gtag('event', 'cta_click', {
+                    event_category: 'Engagement',
+                    event_label: btn.textContent.trim()
+                });
+            });
+        });
+
+        // Track social icon hovers
+        document.querySelectorAll('.social-icon').forEach(icon => {
+            icon.addEventListener('mouseenter', () => {
+                gtag('event', 'social_icon_hover', {
+                    event_category: 'Engagement',
+                    event_label: icon.getAttribute('title')
+                });
+            });
+        });
+    </script>
+</body>
+</html>

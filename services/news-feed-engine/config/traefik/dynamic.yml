@@ -1,0 +1,126 @@
+# ElevatedIQ News Feed Engine - Traefik Dynamic Configuration
+# Routes traffic to news-feed-engine services via dev.elevatediq.ai/news/*
+
+http:
+  # Routers
+  routers:
+    # News Feed API
+    news-api:
+      rule: "Host(`dev.elevatediq.ai`) && PathPrefix(`/news/api`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - security-headers
+        - rate-limit
+        - gzip
+        - strip-news-prefix
+      service: news-api
+      tls:
+        certResolver: letsencrypt
+      priority: 100
+
+    # News Feed Frontend (if separate)
+    news-frontend:
+      rule: "Host(`dev.elevatediq.ai`) && PathPrefix(`/news`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - security-headers
+        - gzip
+      service: news-frontend
+      tls:
+        certResolver: letsencrypt
+      priority: 90
+
+    # News Feed Prometheus
+    news-prometheus:
+      rule: "Host(`dev.elevatediq.ai`) && PathPrefix(`/news/prometheus`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - security-headers
+        - strip-news-prometheus-prefix
+      service: news-prometheus
+      tls:
+        certResolver: letsencrypt
+      priority: 100
+
+    # News Feed Grafana
+    news-grafana:
+      rule: "Host(`dev.elevatediq.ai`) && PathPrefix(`/news/grafana`)"
+      entryPoints:
+        - websecure
+      middlewares:
+        - security-headers
+        - strip-news-grafana-prefix
+      service: news-grafana
+      tls:
+        certResolver: letsencrypt
+      priority: 100
+
+  # Middlewares
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        customResponseHeaders:
+          X-Content-Type-Options: "nosniff"
+          X-Frame-Options: "DENY"
+          X-XSS-Protection: "1; mode=block"
+
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 50
+        period: 1s
+
+    gzip:
+      compress:
+        excludedContentTypes:
+          - text/event-stream
+
+    strip-news-prefix:
+      stripPrefix:
+        prefixes:
+          - "/news/api"
+
+    strip-news-prometheus-prefix:
+      stripPrefix:
+        prefixes:
+          - "/news/prometheus"
+
+    strip-news-grafana-prefix:
+      stripPrefixRegex:
+        regex:
+          - "^/news/grafana"
+
+  # Services
+  services:
+    news-api:
+      loadBalancer:
+        servers:
+          - url: "http://elevatediq-news-feed-engine:8080"
+        healthCheck:
+          path: /health
+          interval: 30s
+          timeout: 10s
+
+    news-frontend:
+      loadBalancer:
+        servers:
+          - url: "http://elevatediq-news-feed-engine:8080"
+
+    news-prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://elevatediq-prometheus:9090"
+
+    news-grafana:
+      loadBalancer:
+        servers:
+          - url: "http://elevatediq-grafana:3000"

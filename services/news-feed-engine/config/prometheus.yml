@@ -1,0 +1,71 @@
+# ElevatedIQ News Feed Engine - Prometheus Configuration
+# Scrapes metrics from the News Feed Engine and Processor
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+  external_labels:
+    environment: 'production'
+    service: 'news-feed-engine'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['elevatediq-alertmanager:9093']
+
+# Rule files
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['127.0.0.1:9090']
+
+  # News Feed Engine Go service
+  - job_name: 'news-feed-engine'
+    static_configs:
+      - targets: ['elevatediq-news-feed-engine:8080']
+    metrics_path: /metrics
+
+  # News Feed Processor Python service
+  - job_name: 'news-feed-processor'
+    static_configs:
+      - targets: ['elevatediq-news-feed-processor:9090']
+    metrics_path: /
+
+  # Kafka metrics via kafka_exporter
+  - job_name: 'kafka-exporter'
+    static_configs:
+      - targets: ['elevatediq-kafka-exporter:9308']
+
+  # Redis metrics via redis_exporter
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['news-feed-redis-exporter:9121']
+
+  # PostgreSQL metrics via postgres_exporter
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['news-feed-postgres-exporter:9187']
+
+  # Blackbox HTTP probes for service endpoints
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://elevatediq-news-feed-engine:8080/health
+        - http://elevatediq-news-feed-processor:9090/
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: elevatediq-blackbox-exporter:9115

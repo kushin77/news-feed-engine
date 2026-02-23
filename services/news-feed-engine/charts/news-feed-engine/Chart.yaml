@@ -1,0 +1,64 @@
+apiVersion: v2
+name: news-feed-engine
+description: |
+  ElevatedIQ News Feed Engine with Elite AI Enhancements.
+  Features autonomous AI agents, real-time trend detection,
+  automated video generation, and cross-platform publishing.
+type: application
+version: 2.0.0
+appVersion: "2.0.0"
+
+keywords:
+  - ai
+  - news-feed
+  - video-generation
+  - content-automation
+  - ai-agents
+  - trend-detection
+  - multi-platform-publishing
+  - analytics
+  - oauth
+
+home: https://github.com/elevatediq/news-feed-engine
+sources:
+  - https://github.com/elevatediq/news-feed-engine
+
+maintainers:
+  - name: ElevatedIQ Team
+    email: platform@elevatediq.ai
+
+dependencies:
+  - name: postgresql
+    version: "~13.0.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.enabled
+
+  - name: redis
+    version: "~18.0.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+
+  - name: kafka
+    version: "~26.0.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: kafka.enabled
+
+  - name: prometheus
+    version: "~25.0.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: analytics.prometheus.enabled
+
+  - name: grafana
+    version: "~7.0.0"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: analytics.grafana.enabled
+
+annotations:
+  category: AI/ML
+  licenses: Apache-2.0
+  artifacthub.io/changes: |
+    - Added AI Agents system with 5 autonomous agents
+    - Added real-time trend detection from 6 sources
+    - Added Kafka-based analytics pipeline
+    - Added OAuth manager for 8 platforms
+    - Added Prometheus metrics and Grafana dashboards

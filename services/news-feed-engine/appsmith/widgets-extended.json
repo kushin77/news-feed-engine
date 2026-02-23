@@ -1,0 +1,443 @@
+{
+  "widgets": {
+    "WhiteLabel": {
+      "TenantSelector": {
+        "type": "SELECT_WIDGET",
+        "widgetName": "TenantSelector",
+        "label": "Select Tenant",
+        "options": "{{GetWhiteLabelConfigs.data.configs?.map(c => ({label: c.config_name + ' (' + c.tenant_id + ')', value: c.id})) || []}}",
+        "defaultOptionValue": "",
+        "onOptionChange": "{{storeValue('selectedTenantConfig', GetWhiteLabelConfigs.data.configs?.find(c => c.id === TenantSelector.selectedOptionValue))}}"
+      },
+      "BrandingConfig": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "BrandingConfig",
+        "title": "Branding Configuration",
+        "children": [
+          {
+            "type": "COLOR_PICKER_WIDGET",
+            "widgetName": "PrimaryColorPicker",
+            "label": "Primary Color",
+            "defaultColor": "{{appsmith.store.selectedTenantConfig?.branding?.primary_color || '#6C5CE7'}}"
+          },
+          {
+            "type": "COLOR_PICKER_WIDGET",
+            "widgetName": "SecondaryColorPicker",
+            "label": "Secondary Color",
+            "defaultColor": "{{appsmith.store.selectedTenantConfig?.branding?.secondary_color || '#00B894'}}"
+          },
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "LogoUrlInput",
+            "label": "Logo URL",
+            "placeholderText": "https://example.com/logo.png",
+            "defaultText": "{{appsmith.store.selectedTenantConfig?.branding?.logo_url || ''}}"
+          },
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "FaviconUrlInput",
+            "label": "Favicon URL",
+            "placeholderText": "https://example.com/favicon.ico",
+            "defaultText": "{{appsmith.store.selectedTenantConfig?.branding?.favicon_url || ''}}"
+          },
+          {
+            "type": "CODE_EDITOR_WIDGET",
+            "widgetName": "CustomCSSInput",
+            "label": "Custom CSS",
+            "mode": "css",
+            "defaultText": "{{appsmith.store.selectedTenantConfig?.branding?.custom_css || ''}}",
+            "height": 200
+          }
+        ]
+      },
+      "FeatureToggles": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "FeatureToggles",
+        "title": "Feature Configuration",
+        "children": [
+          {
+            "type": "SWITCH_WIDGET",
+            "widgetName": "EnableVideoSummariesSwitch",
+            "label": "Enable Video Summaries",
+            "defaultSwitchState": "{{appsmith.store.selectedTenantConfig?.features?.enable_video_summaries ?? true}}"
+          },
+          {
+            "type": "SWITCH_WIDGET",
+            "widgetName": "EnableAIAnalysisSwitch",
+            "label": "Enable AI Analysis",
+            "defaultSwitchState": "{{appsmith.store.selectedTenantConfig?.features?.enable_ai_analysis ?? true}}"
+          },
+          {
+            "type": "SWITCH_WIDGET",
+            "widgetName": "EnableSemanticSearchSwitch",
+            "label": "Enable Semantic Search",
+            "defaultSwitchState": "{{appsmith.store.selectedTenantConfig?.features?.enable_semantic_search ?? true}}"
+          },
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "MaxContentPerDayInput",
+            "label": "Max Content Per Day",
+            "inputType": "NUMBER",
+            "defaultText": "{{appsmith.store.selectedTenantConfig?.features?.max_content_per_day || 100}}",
+            "minNum": 1,
+            "maxNum": 10000
+          }
+        ]
+      },
+      "ContentFiltersConfig": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "ContentFiltersConfig",
+        "title": "Content Filters",
+        "children": [
+          {
+            "type": "MULTI_SELECT_WIDGET_V2",
+            "widgetName": "AllowedCategoriesSelect",
+            "label": "Allowed Categories",
+            "options": [
+              { "label": "Technology", "value": "technology" },
+              { "label": "Finance", "value": "finance" },
+              { "label": "Science", "value": "science" },
+              { "label": "Business", "value": "business" },
+              { "label": "Health", "value": "health" },
+              { "label": "Entertainment", "value": "entertainment" },
+              { "label": "Politics", "value": "politics" },
+              { "label": "Sports", "value": "sports" }
+            ],
+            "defaultOptionValue": "{{appsmith.store.selectedTenantConfig?.content_filters?.allowed_categories || ['technology', 'finance', 'science', 'business']}}"
+          },
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "BlockedKeywordsInput",
+            "label": "Blocked Keywords (comma-separated)",
+            "placeholderText": "spam, inappropriate, etc.",
+            "defaultText": "{{appsmith.store.selectedTenantConfig?.content_filters?.blocked_keywords?.join(', ') || ''}}"
+          },
+          {
+            "type": "SLIDER_WIDGET",
+            "widgetName": "MinTrustScoreSlider",
+            "label": "Minimum Trust Score",
+            "min": 0,
+            "max": 1,
+            "step": 0.05,
+            "defaultValue": "{{appsmith.store.selectedTenantConfig?.content_filters?.min_trust_score || 0.5}}"
+          }
+        ]
+      },
+      "TenantCreationForm": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "TenantCreationForm",
+        "title": "Create New White-Label Configuration",
+        "isCollapsible": true,
+        "isCollapsed": true,
+        "children": [
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "NewTenantIdInput",
+            "label": "Tenant ID",
+            "placeholderText": "unique-tenant-identifier",
+            "isRequired": true,
+            "regex": "^[a-z0-9-]+$",
+            "errorMessage": "Tenant ID must be lowercase letters, numbers, and hyphens only"
+          },
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "NewConfigNameInput",
+            "label": "Configuration Name",
+            "placeholderText": "My Company News Feed",
+            "isRequired": true
+          },
+          {
+            "type": "BUTTON_WIDGET",
+            "widgetName": "CreateTenantButton",
+            "text": "Create Configuration",
+            "buttonStyle": "PRIMARY",
+            "onClick": "{{CreateWhiteLabelConfig.run()}}"
+          }
+        ]
+      },
+      "SaveWhiteLabelButton": {
+        "type": "BUTTON_WIDGET",
+        "widgetName": "SaveWhiteLabelButton",
+        "text": "Save White-Label Configuration",
+        "buttonStyle": "PRIMARY",
+        "isDisabled": "{{!TenantSelector.selectedOptionValue}}",
+        "onClick": "{{UpdateWhiteLabelConfig.run()}}"
+      }
+    },
+    "Settings": {
+      "GeneralSettings": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "GeneralSettings",
+        "title": "General Settings",
+        "children": [
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "RetentionDaysInput",
+            "label": "Content Retention (days)",
+            "inputType": "NUMBER",
+            "defaultText": "{{GetSettings.data?.content_retention_days || 90}}",
+            "minNum": 7,
+            "maxNum": 365,
+            "tooltip": "How long to keep processed content before archiving"
+          },
+          {
+            "type": "SWITCH_WIDGET",
+            "widgetName": "AutoModerationSwitch",
+            "label": "Enable Auto-Moderation",
+            "defaultSwitchState": "{{GetSettings.data?.enable_auto_moderation ?? false}}",
+            "tooltip": "Automatically approve/reject content based on AI analysis"
+          },
+          {
+            "type": "SLIDER_WIDGET",
+            "widgetName": "ModerationThresholdSlider",
+            "label": "Auto-Moderation Threshold",
+            "min": 0,
+            "max": 1,
+            "step": 0.05,
+            "defaultValue": "{{GetSettings.data?.moderation_threshold || 0.7}}",
+            "isDisabled": "{{!AutoModerationSwitch.isSwitchedOn}}",
+            "tooltip": "Content with relevance score above this threshold is auto-approved"
+          }
+        ]
+      },
+      "AISettings": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "AISettings",
+        "title": "AI Configuration",
+        "children": [
+          {
+            "type": "SELECT_WIDGET",
+            "widgetName": "AIModelSelect",
+            "label": "AI Model",
+            "options": [
+              { "label": "Claude 3.5 Sonnet", "value": "claude-3-5-sonnet-20241022" },
+              { "label": "Claude 3 Opus", "value": "claude-3-opus-20240229" },
+              { "label": "Claude 3 Haiku", "value": "claude-3-haiku-20240307" }
+            ],
+            "defaultOptionValue": "{{GetSettings.data?.ai_model || 'claude-3-5-sonnet-20241022'}}"
+          },
+          {
+            "type": "SLIDER_WIDGET",
+            "widgetName": "AITemperatureSlider",
+            "label": "AI Temperature",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "defaultValue": "{{GetSettings.data?.ai_temperature || 0.3}}",
+            "tooltip": "Lower = more consistent, Higher = more creative"
+          },
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "KafkaBatchSizeInput",
+            "label": "Processing Batch Size",
+            "inputType": "NUMBER",
+            "defaultText": "{{GetSettings.data?.kafka_batch_size || 10}}",
+            "minNum": 1,
+            "maxNum": 100,
+            "tooltip": "Number of items to process in each batch"
+          },
+          {
+            "type": "INPUT_WIDGET_V2",
+            "widgetName": "ProcessingIntervalInput",
+            "label": "Processing Interval (seconds)",
+            "inputType": "NUMBER",
+            "defaultText": "{{GetSettings.data?.processing_interval_seconds || 60}}",
+            "minNum": 10,
+            "maxNum": 3600,
+            "tooltip": "How often to check for new content to process"
+          }
+        ]
+      },
+      "IntegrationSettings": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "IntegrationSettings",
+        "title": "Platform Integrations",
+        "children": [
+          {
+            "type": "SWITCH_WIDGET",
+            "widgetName": "YouTubeAPISwitch",
+            "label": "YouTube API",
+            "defaultSwitchState": "{{GetSettings.data?.youtube_api_enabled ?? true}}"
+          },
+          {
+            "type": "SWITCH_WIDGET",
+            "widgetName": "TwitterAPISwitch",
+            "label": "Twitter API",
+            "defaultSwitchState": "{{GetSettings.data?.twitter_api_enabled ?? false}}"
+          },
+          {
+            "type": "SWITCH_WIDGET",
+            "widgetName": "RSSFeedsSwitch",
+            "label": "RSS/Blog Feeds",
+            "defaultSwitchState": "{{GetSettings.data?.rss_feeds_enabled ?? true}}"
+          },
+          {
+            "type": "TEXT_WIDGET",
+            "widgetName": "WebhookUrlDisplay",
+            "text": "Webhook URL: {{appsmith.config.NEWS_FEED_API_URL}}/api/v1/webhooks",
+            "fontStyle": "ITALIC"
+          }
+        ]
+      },
+      "SaveSettingsButton": {
+        "type": "BUTTON_WIDGET",
+        "widgetName": "SaveSettingsButton",
+        "text": "Save Settings",
+        "buttonStyle": "PRIMARY",
+        "onClick": "{{UpdateSettings.run()}}"
+      }
+    },
+    "VideoSummaries": {
+      "VideoFilters": {
+        "type": "CONTAINER_WIDGET",
+        "widgetName": "VideoFilters",
+        "orientation": "horizontal",
+        "children": [
+          {
+            "type": "SELECT_WIDGET",
+            "widgetName": "VideoStatusFilter",
+            "placeholderText": "Filter by status",
+            "options": [
+              { "label": "All Status", "value": "" },
+              { "label": "Completed", "value": "completed" },
+              { "label": "Processing", "value": "processing" },
+              { "label": "Failed", "value": "failed" },
+              { "label": "Pending", "value": "pending" }
+            ],
+            "defaultOptionValue": "",
+            "onOptionChange": "{{GetVideoSummaries.run()}}"
+          }
+        ]
+      },
+      "VideoSummariesTable": {
+        "type": "TABLE_WIDGET_V2",
+        "widgetName": "VideoSummariesTable",
+        "tableData": "{{GetVideoSummaries.data.video_summaries || []}}",
+        "primaryColumns": {
+          "video_title": {
+            "columnType": "text",
+            "alias": "Video Title",
+            "width": 300
+          },
+          "creator_name": {
+            "columnType": "text",
+            "alias": "Creator"
+          },
+          "duration_seconds": {
+            "columnType": "number",
+            "alias": "Duration",
+            "computedValue": "{{Math.floor(currentRow.duration_seconds / 60)}}m {{currentRow.duration_seconds % 60}}s"
+          },
+          "status": {
+            "columnType": "text",
+            "alias": "Status",
+            "cellBackground": "{{currentRow.status === 'completed' ? '#D4EDDA' : currentRow.status === 'processing' ? '#FFF3CD' : currentRow.status === 'failed' ? '#F8D7DA' : '#E2E3E5'}}"
+          },
+          "created_at": {
+            "columnType": "date",
+            "alias": "Created",
+            "inputFormat": "YYYY-MM-DDTHH:mm:ss",
+            "outputFormat": "MMM DD, HH:mm"
+          },
+          "actions": {
+            "columnType": "button",
+            "alias": "Actions",
+            "buttonLabel": "View",
+            "onClick": "{{showModal('VideoSummaryModal')}}"
+          }
+        },
+        "serverSidePagination": true,
+        "totalRecordsCount": "{{GetVideoSummaries.data.total || 0}}",
+        "pageSize": 20,
+        "onPageChange": "{{GetVideoSummaries.run()}}"
+      },
+      "VideoSummaryModal": {
+        "type": "MODAL_WIDGET",
+        "widgetName": "VideoSummaryModal",
+        "title": "Video Summary",
+        "size": "MODAL_LARGE",
+        "children": [
+          {
+            "type": "VIDEO_WIDGET",
+            "widgetName": "VideoPlayer",
+            "url": "{{VideoSummariesTable.selectedRow.video_url}}",
+            "autoPlay": false
+          },
+          {
+            "type": "TEXT_WIDGET",
+            "widgetName": "VideoTitle",
+            "text": "{{VideoSummariesTable.selectedRow.video_title}}",
+            "fontStyle": "BOLD",
+            "fontSize": "1.25rem"
+          },
+          {
+            "type": "TABS_WIDGET",
+            "widgetName": "SummaryTabs",
+            "tabs": [
+              {
+                "label": "Summary",
+                "id": "summary-tab",
+                "children": [
+                  {
+                    "type": "TEXT_WIDGET",
+                    "widgetName": "SummaryText",
+                    "text": "{{VideoSummariesTable.selectedRow.summary}}"
+                  }
+                ]
+              },
+              {
+                "label": "Key Points",
+                "id": "keypoints-tab",
+                "children": [
+                  {
+                    "type": "LIST_WIDGET",
+                    "widgetName": "KeyPointsList",
+                    "items": "{{VideoSummariesTable.selectedRow.key_points || []}}",
+                    "template": {
+                      "type": "TEXT_WIDGET",
+                      "text": "• {{currentItem}}"
+                    }
+                  }
+                ]
+              },
+              {
+                "label": "Transcript",
+                "id": "transcript-tab",
+                "children": [
+                  {
+                    "type": "TEXT_WIDGET",
+                    "widgetName": "TranscriptText",
+                    "text": "{{VideoSummariesTable.selectedRow.transcript || 'Transcript not available'}}",
+                    "overflow": "SCROLL"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "CONTAINER_WIDGET",
+            "widgetName": "VideoModalButtons",
+            "orientation": "horizontal",
+            "children": [
+              {
+                "type": "BUTTON_WIDGET",
+                "widgetName": "RegenerateSummaryButton",
+                "text": "Regenerate Summary",
+                "buttonStyle": "SECONDARY",
+                "onClick": "{{RegenerateVideoSummary.run()}}",
+                "isDisabled": "{{VideoSummariesTable.selectedRow.status === 'processing'}}"
+              },
+              {
+                "type": "BUTTON_WIDGET",
+                "widgetName": "CloseVideoModal",
+                "text": "Close",
+                "buttonStyle": "PRIMARY",
+                "onClick": "{{closeModal('VideoSummaryModal')}}"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

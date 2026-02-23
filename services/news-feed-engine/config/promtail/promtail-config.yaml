@@ -1,0 +1,115 @@
+# ElevatedIQ News Feed Engine - Promtail Configuration
+# Ships logs from Docker containers to Loki
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    tenant_id: elevatediq
+
+scrape_configs:
+  # Docker container logs
+  - job_name: containers
+    static_configs:
+      - targets:
+          - 127.0.0.1
+        labels:
+          job: containerlogs
+          __path__: /var/lib/docker/containers/*/*log
+
+    pipeline_stages:
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            attrs:
+      - json:
+          expressions:
+            tag:
+          source: attrs
+      - regex:
+          expression: (?P<container_name>(?:[a-z0-9][a-z0-9_.-]*))-(?P<container_id>[a-z0-9]{12})
+          source: tag
+      - timestamp:
+          source: time
+          format: RFC3339Nano
+      - labels:
+          stream:
+          container_name:
+      - output:
+          source: output
+
+  # News Feed Engine specific logs
+  - job_name: news-feed-engine
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["com.elevatediq.service=news-feed-engine"]
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_label_com_elevatediq_service']
+        target_label: 'service'
+      - source_labels: ['__meta_docker_container_label_com_elevatediq_component']
+        target_label: 'component'
+
+  # News Feed Processor logs
+  - job_name: news-feed-processor
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["com.elevatediq.service=news-feed-processor"]
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_label_com_elevatediq_service']
+        target_label: 'service'
+      - source_labels: ['__meta_docker_container_label_com_elevatediq_component']
+        target_label: 'component'
+
+  # Kafka logs
+  - job_name: kafka
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["com.elevatediq.service=kafka"]
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_label_com_elevatediq_service']
+        target_label: 'service'
+
+  # System logs (syslog)
+  - job_name: system
+    static_configs:
+      - targets:
+          - 127.0.0.1
+        labels:
+          job: varlogs
+          __path__: /var/log/*log
+    pipeline_stages:
+      - match:
+          selector: '{job="varlogs"}'
+          stages:
+            - regex:
+                expression: '^(?P<timestamp>\S+ \S+) (?P<hostname>\S+) (?P<process>\S+): (?P<message>.*)$'
+            - labels:
+                hostname:
+                process:
+            - timestamp:
+                source: timestamp
+                format: "Jan _2 15:04:05"

@@ -1,0 +1,133 @@
+# Prometheus alerting and recording rules for News Feed Processor
+# Focus on error rates and latency SLOs (using averages due to Summary metrics)
+
+groups:
+  - name: news-feed-processor-alerts
+    interval: 30s
+    rules:
+      # Processor target down
+      - alert: NewsFeedProcessorDown
+        expr: up{job="news-feed-processor"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: news-feed-processor
+        annotations:
+          summary: "News Feed Processor target is down"
+          description: |
+            Prometheus reports the news-feed-processor target as down for 2 minutes.
+            Check container status, logs, and network connectivity.
+
+      # Error rate over 5 minutes exceeds 5%
+      - alert: NewsFeedProcessorHighErrorRate
+        expr: |
+          sum(rate(news_feed_messages_processed_total{status="error"}[5m]))
+            /
+          sum(rate(news_feed_messages_processed_total[5m]))
+            > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "High error rate in News Feed Processor (>5% over 5m)"
+          description: |
+            Error rate has exceeded 5% for the last 5 minutes.
+            Investigate recent changes, upstream data quality, or AI model timeouts.
+
+      # Elevated average processing latency over 5 minutes (seconds)
+      - alert: NewsFeedProcessorHighAvgLatency
+        expr: |
+          (sum(rate(news_feed_processing_seconds_sum[5m]))
+            /
+           sum(rate(news_feed_processing_seconds_count[5m]))) > 2
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "Elevated average processing latency (>2s over 10m)"
+          description: |
+            Average processing latency stayed above 2 seconds for 10 minutes.
+            Check downstream services (DB, embeddings) and resource limits.
+
+      # Elevated average AI analysis time (>3s) indicates LLM/AI slowness
+      - alert: NewsFeedProcessorHighAIAnalysisTime
+        expr: |
+          (rate(news_feed_ai_analysis_seconds_sum[5m])
+            /
+           rate(news_feed_ai_analysis_seconds_count[5m])) > 3
+        for: 10m
+        labels:
+          severity: info
+          service: news-feed-processor
+        annotations:
+          summary: "AI analysis average time high (>3s)"
+          description: |
+            AI analysis average time above threshold; may indicate provider slowness or throttling.
+
+      # SLO: P95 processing latency per platform
+      - alert: NewsFeedProcessorP95LatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, platform) (rate(news_feed_processing_seconds_bucket[5m]))
+          ) > 3
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "P95 processing latency high (>3s)"
+          description: |
+            P95 processing latency exceeded 3 seconds for at least 10 minutes.
+            Platform={{ $labels.platform }}.
+
+      # SLO: P99 processing latency per platform (critical)
+      - alert: NewsFeedProcessorP99LatencyHigh
+        expr: |
+          histogram_quantile(
+            0.99,
+            sum by (le, platform) (rate(news_feed_processing_seconds_bucket[5m]))
+          ) > 6
+        for: 10m
+        labels:
+          severity: critical
+          service: news-feed-processor
+        annotations:
+          summary: "P99 processing latency high (>6s)"
+          description: |
+            P99 processing latency exceeded 6 seconds for at least 10 minutes.
+            Platform={{ $labels.platform }}.
+
+      # SLO: P95 AI analysis time
+      - alert: NewsFeedProcessorP95AIAnalysisHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(news_feed_ai_analysis_seconds_bucket[5m]))
+          ) > 4
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "P95 AI analysis time high (>4s)"
+          description: |
+            P95 AI analysis time exceeded 4 seconds for at least 10 minutes.
+
+      # SLO: P95 embedding time
+      - alert: NewsFeedProcessorP95EmbeddingHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(news_feed_embedding_seconds_bucket[5m]))
+          ) > 4
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "P95 embedding time high (>4s)"
+          description: |
+            P95 embedding generation time exceeded 4 seconds for at least 10 minutes.

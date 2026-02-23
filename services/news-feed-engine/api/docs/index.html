@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElevatedIQ News Feed Engine API Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .header {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .version-badge {
+            background: rgba(124, 58, 237, 0.2);
+            color: #a78bfa;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-links a {
+            color: #a0a0a0;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-links a.active {
+            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff, #a0a0a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.125rem;
+            color: #888;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .doc-viewer {
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .tab.active {
+            color: #7c3aed;
+            border-bottom: 2px solid #7c3aed;
+            margin-bottom: -1px;
+            background: #fff;
+        }
+
+        .doc-frame {
+            width: 100%;
+            height: 80vh;
+            border: none;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .quick-link {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .quick-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .quick-link h3 {
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-link p {
+            color: #888;
+            font-size: 0.875rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 1.75rem;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">EQ</div>
+            <span class="logo-text">ElevatedIQ</span>
+            <span class="version-badge">v1.0.0</span>
+        </div>
+        <nav class="nav-links">
+            <a href="#swagger" class="active">Swagger UI</a>
+            <a href="#redoc">ReDoc</a>
+            <a href="openapi.yaml" download>Download Spec</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <h1>News Feed Engine API</h1>
+            <p>AI-powered news aggregation platform with semantic search, video summarization, and multi-tenant white-label support.</p>
+        </section>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">31</div>
+                <div class="stat-label">API Endpoints</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">9</div>
+                <div class="stat-label">Resource Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">37</div>
+                <div class="stat-label">Schema Models</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Environments</div>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <a href="#content" class="quick-link">
+                <h3>📰 Content API</h3>
+                <p>Content discovery, search, trending, and category filtering</p>
+            </a>
+            <a href="#ai" class="quick-link">
+                <h3>🤖 AI API</h3>
+                <p>Sentiment analysis, entity extraction, summarization</p>
+            </a>
+            <a href="#embeddings" class="quick-link">
+                <h3>🧬 Embeddings API</h3>
+                <p>Vector generation, semantic search, similarity matching</p>
+            </a>
+            <a href="#videos" class="quick-link">
+                <h3>🎬 Videos API</h3>
+                <p>AI-generated video summaries and transcripts</p>
+            </a>
+            <a href="#analytics" class="quick-link">
+                <h3>📊 Analytics API</h3>
+                <p>Content, engagement, and trend analytics</p>
+            </a>
+            <a href="#admin" class="quick-link">
+                <h3>⚙️ Admin API</h3>
+                <p>Configuration, ingestion, and white-label management</p>
+            </a>
+        </div>
+
+        <div class="doc-viewer">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('swagger')">Swagger UI</button>
+                <button class="tab" onclick="showTab('redoc')">ReDoc</button>
+            </div>
+            <div id="swagger-container">
+                <iframe id="swagger-frame" class="doc-frame" src="swagger-ui.html"></iframe>
+            </div>
+            <div id="redoc-container" style="display: none;">
+                <iframe id="redoc-frame" class="doc-frame" src="redoc.html"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2024 ElevatedIQ. All rights reserved.</p>
+        <p>API Version 1.0.0 | OpenAPI 3.1.0</p>
+    </footer>
+
+    <script>
+        function showTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            const swaggerContainer = document.getElementById('swagger-container');
+            const redocContainer = document.getElementById('redoc-container');
+
+            tabs.forEach(t => t.classList.remove('active'));
+
+            if (tab === 'swagger') {
+                event.target.classList.add('active');
+                swaggerContainer.style.display = 'block';
+                redocContainer.style.display = 'none';
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                swaggerContainer.style.display = 'none';
+                redocContainer.style.display = 'block';
+            }
+        }
+
+        // Handle hash navigation
+        if (window.location.hash === '#redoc') {
+            showTab('redoc');
+        }
+    </script>
+</body>
+</html>

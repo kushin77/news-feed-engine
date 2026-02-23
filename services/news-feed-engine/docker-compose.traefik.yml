@@ -1,0 +1,91 @@
+# ElevatedIQ News Feed Engine - Traefik Reverse Proxy Configuration
+# Extends docker-compose.news-feed.yml with Traefik for external routing
+# Usage: docker compose -f docker-compose.news-feed.yml -f docker-compose.traefik.yml up
+
+services:
+  # Traefik reverse proxy for external routing
+  news-feed-traefik:
+    image: traefik:v2.11
+    container_name: news-feed-traefik
+    restart: unless-stopped
+    command:
+      # API and Dashboard
+      - "--api=true"
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.metrics.address=:8082"
+
+      # HTTP to HTTPS redirect
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+
+      # File provider for dynamic configuration
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+
+      # Docker provider
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=elevatediq-net"
+
+      # Let's Encrypt ACME
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@elevatediq.ai}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+
+      # Logging
+      - "--log.level=${TRAEFIK_LOG_LEVEL:-INFO}"
+      - "--accesslog=true"
+      - "--accesslog.format=json"
+
+      # Prometheus metrics
+      - "--metrics.prometheus=true"
+      - "--metrics.prometheus.entryPoint=metrics"
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8082:8082"  # Metrics
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik:/etc/traefik/dynamic:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - elevatediq-net
+    labels:
+      # Dashboard routing
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.dev.elevatediq.ai`)"
+      - "traefik.http.routers.traefik-dashboard.entrypoints=websecure"
+      - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-dashboard.service=api@internal"
+      - "traefik.http.routers.traefik-dashboard.middlewares=traefik-auth"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_DASHBOARD_AUTH:-admin:$$apr1$$xyz$$example}"
+      # Labels for managed service
+      - "com.elevatediq.managed=iac"
+      - "com.elevatediq.service=traefik"
+      - "com.elevatediq.component=proxy"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+volumes:
+  traefik_letsencrypt:
+    name: elevatediq-news-feed-traefik-letsencrypt
+
+networks:
+  elevatediq-net:
+    external: true

@@ -1,0 +1,186 @@
+# ElevatedIQ News Feed Engine - Full Observability Stack
+# Adds Jaeger, OpenTelemetry Collector, and enhanced monitoring
+# Usage: docker compose -f docker-compose.news-feed.yml -f docker-compose.observability.yml up
+
+services:
+  # Jaeger - Distributed Tracing Backend
+  jaeger:
+    image: jaegertracing/all-in-one:1.55
+    container_name: news-feed-jaeger
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: "false"
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+      QUERY_BASE_PATH: /jaeger
+    ports:
+      - "16686:16686" # UI
+      - "14250:14250" # gRPC
+      - "4317:4317" # OTLP gRPC (shared with OTEL)
+      - "4318:4318" # OTLP HTTP (shared with OTEL)
+      - "6831:6831/udp" # Thrift compact
+    volumes:
+      - jaeger_data:/badger
+      - ./config/jaeger/sampling.json:/etc/jaeger/sampling.json:ro
+    networks:
+      - elevatediq-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.news-jaeger.rule=Host(`dev.elevatediq.ai`) && PathPrefix(`/jaeger`)"
+      - "traefik.http.routers.news-jaeger.entrypoints=websecure"
+      - "traefik.http.routers.news-jaeger.tls.certresolver=letsencrypt"
+      - "traefik.http.services.news-jaeger.loadbalancer.server.port=16686"
+      - "com.elevatediq.managed=iac"
+      - "com.elevatediq.service=jaeger"
+      - "com.elevatediq.component=tracing"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://127.0.0.1:16686/ || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: news-feed-otel-collector
+    restart: unless-stopped
+    command: [ "--config=/etc/otel/config.yaml" ]
+    volumes:
+      - ./config/otel/otel-collector-config.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4319:4317" # OTLP gRPC (alternate port to avoid conflict)
+      - "4320:4318" # OTLP HTTP (alternate port)
+      - "8888:8888" # Prometheus metrics (internal)
+      - "8889:8889" # Prometheus exporter
+      - "13133:13133" # Health check
+    environment:
+      ELEVATEDIQ_ENVIRONMENT: ${ELEVATEDIQ_ENVIRONMENT:-development}
+    networks:
+      - elevatediq-net
+    depends_on:
+      - jaeger
+    labels:
+      - "com.elevatediq.managed=iac"
+      - "com.elevatediq.service=otel-collector"
+      - "com.elevatediq.component=telemetry"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://127.0.0.1:13133/ || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  # Loki - Log Aggregation
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: news-feed-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki_data:/loki
+    networks:
+      - elevatediq-net
+    labels:
+      - "com.elevatediq.managed=iac"
+      - "com.elevatediq.service=loki"
+      - "com.elevatediq.component=logging"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://127.0.0.1:3100/ready || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+
+  # Promtail - Log Shipper to Loki
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: news-feed-promtail
+    restart: unless-stopped
+    volumes:
+      - /var/log:/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/promtail/promtail-config.yaml:/etc/promtail/config.yml:ro
+    networks:
+      - elevatediq-net
+    depends_on:
+      - loki
+    labels:
+      - "com.elevatediq.managed=iac"
+      - "com.elevatediq.service=promtail"
+      - "com.elevatediq.component=logging"
+    security_opt:
+      - no-new-privileges:true
+
+  # Node Exporter - Host metrics
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: news-feed-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    ports:
+      - "9100:9100"
+    networks:
+      - elevatediq-net
+    labels:
+      - "com.elevatediq.managed=iac"
+      - "com.elevatediq.service=node-exporter"
+      - "com.elevatediq.component=monitoring"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+
+  # cAdvisor - Container metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: news-feed-cadvisor
+    restart: unless-stopped
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - elevatediq-net
+    labels:
+      - "com.elevatediq.managed=iac"
+      - "com.elevatediq.service=cadvisor"
+      - "com.elevatediq.component=monitoring"
+
+volumes:
+  jaeger_data:
+    name: elevatediq-news-feed-jaeger-data
+  loki_data:
+    name: elevatediq-news-feed-loki-data
+
+networks:
+  elevatediq-net:
+    external: true

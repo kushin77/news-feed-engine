@@ -1,0 +1,114 @@
+# ElevatedIQ News Feed Engine - Kafka Topic Configuration
+# For use with Strimzi Kafka Operator on Kubernetes
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: news-feed-raw-content
+  namespace: elevatediq
+  labels:
+    strimzi.io/cluster: elevatediq-kafka
+    app.kubernetes.io/component: news-feed
+    app.kubernetes.io/part-of: elevatediq
+spec:
+  partitions: 6
+  replicas: 2
+  config:
+    retention.ms: "604800000"      # 7 days retention
+    cleanup.policy: "delete"
+    max.message.bytes: "10485760"  # 10MB max message
+    min.insync.replicas: 1
+    compression.type: "lz4"
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: news-feed-processed-content
+  namespace: elevatediq
+  labels:
+    strimzi.io/cluster: elevatediq-kafka
+    app.kubernetes.io/component: news-feed
+    app.kubernetes.io/part-of: elevatediq
+spec:
+  partitions: 6
+  replicas: 2
+  config:
+    retention.ms: "2592000000"     # 30 days retention
+    cleanup.policy: "delete"
+    max.message.bytes: "10485760"  # 10MB max message
+    min.insync.replicas: 1
+    compression.type: "lz4"
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: news-feed-video-jobs
+  namespace: elevatediq
+  labels:
+    strimzi.io/cluster: elevatediq-kafka
+    app.kubernetes.io/component: news-feed
+    app.kubernetes.io/part-of: elevatediq
+spec:
+  partitions: 3
+  replicas: 2
+  config:
+    retention.ms: "86400000"       # 1 day retention (jobs are transient)
+    cleanup.policy: "delete"
+    max.message.bytes: "1048576"   # 1MB max message
+    min.insync.replicas: 1
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: news-feed-analytics-events
+  namespace: elevatediq
+  labels:
+    strimzi.io/cluster: elevatediq-kafka
+    app.kubernetes.io/component: news-feed
+    app.kubernetes.io/part-of: elevatediq
+spec:
+  partitions: 6
+  replicas: 2
+  config:
+    retention.ms: "2592000000"     # 30 days retention
+    cleanup.policy: "delete"
+    max.message.bytes: "1048576"   # 1MB max message
+    min.insync.replicas: 1
+    compression.type: "snappy"
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: news-feed-ingestion-jobs
+  namespace: elevatediq
+  labels:
+    strimzi.io/cluster: elevatediq-kafka
+    app.kubernetes.io/component: news-feed
+    app.kubernetes.io/part-of: elevatediq
+spec:
+  partitions: 3
+  replicas: 2
+  config:
+    retention.ms: "86400000"       # 1 day retention
+    cleanup.policy: "delete"
+    max.message.bytes: "1048576"   # 1MB max message
+    min.insync.replicas: 1
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: news-feed-dlq
+  namespace: elevatediq
+  labels:
+    strimzi.io/cluster: elevatediq-kafka
+    app.kubernetes.io/component: news-feed
+    app.kubernetes.io/part-of: elevatediq
+  annotations:
+    description: "Dead letter queue for failed message processing"
+spec:
+  partitions: 3
+  replicas: 2
+  config:
+    retention.ms: "604800000"      # 7 days retention
+    cleanup.policy: "delete"
+    max.message.bytes: "10485760"  # 10MB max message

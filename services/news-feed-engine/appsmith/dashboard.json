@@ -1,0 +1,581 @@
+{
+  "exportedApplication": {
+    "name": "News Feed Engine Admin",
+    "isPublic": false,
+    "slug": "news-feed-admin",
+    "pages": [
+      {
+        "name": "Dashboard",
+        "slug": "dashboard",
+        "layouts": [
+          {
+            "layoutId": "dashboard-main",
+            "widgetNames": ["StatsContainer", "RecentContentTable", "ContentChart", "ProcessingStatus"]
+          }
+        ]
+      },
+      {
+        "name": "Creators",
+        "slug": "creators",
+        "layouts": [
+          {
+            "layoutId": "creators-main",
+            "widgetNames": ["CreatorsTable", "CreatorForm", "CreatorModal"]
+          }
+        ]
+      },
+      {
+        "name": "Content",
+        "slug": "content",
+        "layouts": [
+          {
+            "layoutId": "content-main",
+            "widgetNames": ["ContentTable", "ContentFilters", "ContentPreview"]
+          }
+        ]
+      },
+      {
+        "name": "White Label",
+        "slug": "whitelabel",
+        "layouts": [
+          {
+            "layoutId": "whitelabel-main",
+            "widgetNames": ["TenantList", "TenantConfig", "BrandingSettings"]
+          }
+        ]
+      },
+      {
+        "name": "Settings",
+        "slug": "settings",
+        "layouts": [
+          {
+            "layoutId": "settings-main",
+            "widgetNames": ["GeneralSettings", "AISettings", "IntegrationSettings"]
+          }
+        ]
+      },
+      {
+        "name": "Observability",
+        "slug": "observability",
+        "layouts": [
+          {
+            "layoutId": "observability-main",
+            "widgetNames": ["ObsStats", "ErrorRateChart", "TargetsTable", "GrafanaPanel"]
+          }
+        ]
+      }
+    ],
+    "publishedPages": [],
+    "color": "#6C5CE7",
+    "icon": "newspaper",
+    "evaluationVersion": 2
+  },
+  "datasources": [
+    {
+      "name": "NewsFeedAPI",
+      "pluginType": "RestAPI",
+      "configuration": {
+        "url": "{{appsmith.config.NEWS_FEED_API_URL}}/api/v1",
+        "headers": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{appsmith.store.adminToken}}"
+          },
+          {
+            "key": "X-Tenant-ID",
+            "value": "{{appsmith.store.tenantId}}"
+          }
+        ],
+        "isSendSessionEnabled": false,
+        "sessionSignatureKey": ""
+      }
+    },
+    {
+      "name": "PrometheusAPI",
+      "pluginType": "RestAPI",
+      "configuration": {
+        "url": "{{appsmith.config.PROMETHEUS_BASE_URL}}",
+        "headers": [],
+        "isSendSessionEnabled": false,
+        "sessionSignatureKey": ""
+      }
+    }
+  ],
+  "queries": [
+    {
+      "name": "GetDashboardStats",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/admin/stats",
+        "httpMethod": "GET",
+        "queryParameters": [],
+        "headers": []
+      },
+      "runOnPageLoad": true
+    },
+    {
+      "name": "GetCreators",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/creators",
+        "httpMethod": "GET",
+        "queryParameters": [
+          {
+            "key": "page",
+            "value": "{{CreatorsTable.pageNo}}"
+          },
+          {
+            "key": "limit",
+            "value": "{{CreatorsTable.pageSize}}"
+          },
+          {
+            "key": "status",
+            "value": "{{StatusFilter.selectedOptionValue}}"
+          }
+        ],
+        "headers": []
+      }
+    },
+    {
+      "name": "CreateCreator",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/creators",
+        "httpMethod": "POST",
+        "body": "{{ JSON.stringify({ name: CreatorNameInput.text, platform: PlatformSelect.selectedOptionValue, platform_id: PlatformIdInput.text, topics: TopicsInput.text.split(',').map(t => t.trim()), trust_score: parseFloat(TrustScoreInput.text) || 0.5 }) }}",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
+      "onSuccess": [
+        {
+          "type": "SHOW_TOAST",
+          "payload": {
+            "message": "Creator added successfully!",
+            "variant": "success"
+          }
+        },
+        {
+          "type": "RUN_QUERY",
+          "payload": {
+            "queryName": "GetCreators"
+          }
+        }
+      ]
+    },
+    {
+      "name": "UpdateCreator",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/creators/{{CreatorsTable.selectedRow.id}}",
+        "httpMethod": "PUT",
+        "body": "{{ JSON.stringify({ name: EditCreatorNameInput.text, topics: EditTopicsInput.text.split(',').map(t => t.trim()), trust_score: parseFloat(EditTrustScoreInput.text), status: EditStatusSelect.selectedOptionValue }) }}",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
+      "onSuccess": [
+        {
+          "type": "SHOW_TOAST",
+          "payload": {
+            "message": "Creator updated successfully!",
+            "variant": "success"
+          }
+        },
+        {
+          "type": "CLOSE_MODAL",
+          "payload": {
+            "modalName": "EditCreatorModal"
+          }
+        },
+        {
+          "type": "RUN_QUERY",
+          "payload": {
+            "queryName": "GetCreators"
+          }
+        }
+      ]
+    },
+    {
+      "name": "DeleteCreator",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/creators/{{CreatorsTable.selectedRow.id}}",
+        "httpMethod": "DELETE",
+        "headers": []
+      },
+      "confirmBeforeRun": true,
+      "confirmMessage": "Are you sure you want to delete this creator?",
+      "onSuccess": [
+        {
+          "type": "SHOW_TOAST",
+          "payload": {
+            "message": "Creator deleted successfully!",
+            "variant": "success"
+          }
+        },
+        {
+          "type": "RUN_QUERY",
+          "payload": {
+            "queryName": "GetCreators"
+          }
+        }
+      ]
+    },
+    {
+      "name": "GetContent",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/content",
+        "httpMethod": "GET",
+        "queryParameters": [
+          {
+            "key": "page",
+            "value": "{{ContentTable.pageNo}}"
+          },
+          {
+            "key": "limit",
+            "value": "{{ContentTable.pageSize}}"
+          },
+          {
+            "key": "creator_id",
+            "value": "{{CreatorFilter.selectedOptionValue}}"
+          },
+          {
+            "key": "category",
+            "value": "{{CategoryFilter.selectedOptionValue}}"
+          },
+          {
+            "key": "status",
+            "value": "{{ContentStatusFilter.selectedOptionValue}}"
+          },
+          {
+            "key": "start_date",
+            "value": "{{DateRangePicker.startDate}}"
+          },
+          {
+            "key": "end_date",
+            "value": "{{DateRangePicker.endDate}}"
+          }
+        ],
+        "headers": []
+      }
+    },
+    {
+      "name": "UpdateContentStatus",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/content/{{ContentTable.selectedRow.id}}/status",
+        "httpMethod": "PATCH",
+        "body": "{{ JSON.stringify({ status: StatusActionSelect.selectedOptionValue, moderation_notes: ModerationNotesInput.text }) }}",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
+      "onSuccess": [
+        {
+          "type": "SHOW_TOAST",
+          "payload": {
+            "message": "Content status updated!",
+            "variant": "success"
+          }
+        },
+        {
+          "type": "RUN_QUERY",
+          "payload": {
+            "queryName": "GetContent"
+          }
+        }
+      ]
+    },
+    {
+      "name": "GetWhiteLabelConfigs",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/admin/whitelabel/configs",
+        "httpMethod": "GET",
+        "queryParameters": [],
+        "headers": []
+      }
+    },
+    {
+      "name": "CreateWhiteLabelConfig",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/admin/whitelabel/configs",
+        "httpMethod": "POST",
+        "body": "{{ JSON.stringify({ tenant_id: TenantIdInput.text, config_name: ConfigNameInput.text, branding: { primary_color: PrimaryColorPicker.selectedColor, secondary_color: SecondaryColorPicker.selectedColor, logo_url: LogoUrlInput.text, favicon_url: FaviconUrlInput.text, custom_css: CustomCSSInput.text }, features: { enable_video_summaries: EnableVideoSummariesSwitch.isSwitchedOn, enable_ai_analysis: EnableAIAnalysisSwitch.isSwitchedOn, enable_semantic_search: EnableSemanticSearchSwitch.isSwitchedOn, max_content_per_day: parseInt(MaxContentPerDayInput.text) || 100 }, content_filters: { allowed_categories: AllowedCategoriesSelect.selectedOptionValues, blocked_keywords: BlockedKeywordsInput.text.split(',').map(k => k.trim()), min_trust_score: parseFloat(MinTrustScoreInput.text) || 0.5 } }) }}",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
+      "onSuccess": [
+        {
+          "type": "SHOW_TOAST",
+          "payload": {
+            "message": "White-label config created!",
+            "variant": "success"
+          }
+        },
+        {
+          "type": "RUN_QUERY",
+          "payload": {
+            "queryName": "GetWhiteLabelConfigs"
+          }
+        }
+      ]
+    },
+    {
+      "name": "GetSettings",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/admin/config",
+        "httpMethod": "GET",
+        "queryParameters": [],
+        "headers": []
+      },
+      "runOnPageLoad": true
+    },
+    {
+      "name": "UpdateSettings",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/admin/config",
+        "httpMethod": "PUT",
+        "body": "{{ JSON.stringify({ ai_model: AIModelSelect.selectedOptionValue, ai_temperature: parseFloat(AITemperatureSlider.value), content_retention_days: parseInt(RetentionDaysInput.text), enable_auto_moderation: AutoModerationSwitch.isSwitchedOn, moderation_threshold: parseFloat(ModerationThresholdSlider.value), kafka_batch_size: parseInt(KafkaBatchSizeInput.text), processing_interval_seconds: parseInt(ProcessingIntervalInput.text), youtube_api_enabled: YouTubeAPISwitch.isSwitchedOn, twitter_api_enabled: TwitterAPISwitch.isSwitchedOn, rss_feeds_enabled: RSSFeedsSwitch.isSwitchedOn }) }}",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
+      "onSuccess": [
+        {
+          "type": "SHOW_TOAST",
+          "payload": {
+            "message": "Settings saved successfully!",
+            "variant": "success"
+          }
+        }
+      ]
+    },
+    {
+      "name": "GetProcessingQueue",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/admin/processing/queue",
+        "httpMethod": "GET",
+        "queryParameters": [],
+        "headers": []
+      },
+      "runOnPageLoad": true,
+      "refreshInterval": 30000
+    },
+    {
+      "name": "RetryFailedContent",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/admin/processing/retry",
+        "httpMethod": "POST",
+        "body": "{{ JSON.stringify({ content_ids: FailedContentTable.selectedRows.map(r => r.id) }) }}",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
+      "onSuccess": [
+        {
+          "type": "SHOW_TOAST",
+          "payload": {
+            "message": "Content queued for retry!",
+            "variant": "success"
+          }
+        },
+        {
+          "type": "RUN_QUERY",
+          "payload": {
+            "queryName": "GetProcessingQueue"
+          }
+        }
+      ]
+    },
+    {
+      "name": "GetVideoSummaries",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/videos",
+        "httpMethod": "GET",
+        "queryParameters": [
+          {
+            "key": "page",
+            "value": "{{VideoSummariesTable.pageNo}}"
+          },
+          {
+            "key": "limit",
+            "value": "{{VideoSummariesTable.pageSize}}"
+          },
+          {
+            "key": "status",
+            "value": "{{VideoStatusFilter.selectedOptionValue}}"
+          }
+        ],
+        "headers": []
+      }
+    },
+    {
+      "name": "RegenerateVideoSummary",
+      "datasource": "NewsFeedAPI",
+      "configuration": {
+        "path": "/videos/{{VideoSummariesTable.selectedRow.id}}/regenerate",
+        "httpMethod": "POST",
+        "body": "{}",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ]
+      },
+      "onSuccess": [
+        {
+          "type": "SHOW_TOAST",
+          "payload": {
+            "message": "Video summary regeneration queued!",
+            "variant": "success"
+          }
+        }
+      ]
+    }
+  ,
+    {
+      "name": "GetProcessorUp",
+      "datasource": "PrometheusAPI",
+      "configuration": {
+        "path": "/api/v1/query",
+        "httpMethod": "GET",
+        "queryParameters": [
+          { "key": "query", "value": "avg(up{job=\"news-feed-processor\"})" }
+        ],
+        "headers": []
+      },
+      "runOnPageLoad": true,
+      "refreshInterval": 30000
+    },
+    {
+      "name": "GetEngineUp",
+      "datasource": "PrometheusAPI",
+      "configuration": {
+        "path": "/api/v1/query",
+        "httpMethod": "GET",
+        "queryParameters": [
+          { "key": "query", "value": "avg(up{job=\"news-feed-engine\"})" }
+        ],
+        "headers": []
+      },
+      "runOnPageLoad": true,
+      "refreshInterval": 30000
+    },
+    {
+      "name": "GetExportersDown",
+      "datasource": "PrometheusAPI",
+      "configuration": {
+        "path": "/api/v1/query",
+        "httpMethod": "GET",
+        "queryParameters": [
+          { "key": "query", "value": "sum(up{job=~\"kafka-exporter|postgres-exporter|redis-exporter|blackbox-http\"} == 0)" }
+        ],
+        "headers": []
+      },
+      "runOnPageLoad": true,
+      "refreshInterval": 30000
+    },
+    {
+      "name": "GetErrorRate",
+      "datasource": "PrometheusAPI",
+      "configuration": {
+        "path": "/api/v1/query",
+        "httpMethod": "GET",
+        "queryParameters": [
+          { "key": "query", "value": "job:news_feed:processor_error_rate5m" }
+        ],
+        "headers": []
+      },
+      "runOnPageLoad": true,
+      "refreshInterval": 30000
+    },
+    {
+      "name": "GetProcessingP95",
+      "datasource": "PrometheusAPI",
+      "configuration": {
+        "path": "/api/v1/query",
+        "httpMethod": "GET",
+        "queryParameters": [
+          { "key": "query", "value": "job:news_feed:processing_p95_seconds" }
+        ],
+        "headers": []
+      },
+      "runOnPageLoad": true,
+      "refreshInterval": 30000
+    },
+    {
+      "name": "GetErrorRateTS",
+      "datasource": "PrometheusAPI",
+      "configuration": {
+        "path": "/api/v1/query_range",
+        "httpMethod": "GET",
+        "queryParameters": [
+          { "key": "query", "value": "job:news_feed:processor_error_rate5m" },
+          { "key": "start", "value": "{{moment().subtract(6, 'hours').unix()}}" },
+          { "key": "end", "value": "{{moment().unix()}}" },
+          { "key": "step", "value": "60" }
+        ],
+        "headers": []
+      },
+      "runOnPageLoad": true,
+      "refreshInterval": 60000
+    },
+    {
+      "name": "GetTargets",
+      "datasource": "PrometheusAPI",
+      "configuration": {
+        "path": "/api/v1/targets",
+        "httpMethod": "GET",
+        "queryParameters": [],
+        "headers": []
+      },
+      "runOnPageLoad": true,
+      "refreshInterval": 60000
+    }
+  ],
+  "customJsLibraries": [],
+  "theme": {
+    "colors": {
+      "primaryColor": "#6C5CE7",
+      "backgroundColor": "#F8F9FA"
+    },
+    "borderRadius": {
+      "appBorderRadius": "6px"
+    },
+    "boxShadow": {
+      "appBoxShadow": "0 1px 3px rgba(0,0,0,0.12)"
+    },
+    "fontFamily": {
+      "appFont": "Inter"
+    }
+  }
+}

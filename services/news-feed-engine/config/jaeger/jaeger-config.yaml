@@ -1,0 +1,93 @@
+# ElevatedIQ News Feed Engine - Jaeger Configuration
+# Distributed tracing backend
+
+# Collector configuration
+collector:
+  # OTLP receiver
+  otlp:
+    enabled: true
+    grpc:
+      host-port: ":4317"
+    http:
+      host-port: ":4318"
+      cors:
+        allowed-origins:
+          - "https://dev.elevatediq.ai"
+          - "https://elevatediq.ai"
+        allowed-headers:
+          - "*"
+
+  # Jaeger native receiver
+  jaeger:
+    grpc:
+      server-host-port: ":14250"
+    thrift-http:
+      server-host-port: ":14268"
+    thrift-compact:
+      server-host-port: ":6831"
+    thrift-binary:
+      server-host-port: ":6832"
+
+# Query service configuration
+query:
+  base-path: /jaeger
+  static-files: ""
+  ui:
+    config: |
+      {
+        "dependencies": {
+          "menuEnabled": true
+        },
+        "archiveEnabled": true,
+        "tracking": {
+          "gaID": "",
+          "trackErrors": false
+        },
+        "menu": [
+          {
+            "label": "News Feed Documentation",
+            "items": [
+              {
+                "label": "API Docs",
+                "url": "https://dev.elevatediq.ai/news-api/docs"
+              },
+              {
+                "label": "Architecture",
+                "url": "https://docs.elevatediq.ai/news-feed"
+              }
+            ]
+          }
+        ]
+      }
+
+# Storage configuration
+storage:
+  type: badger
+
+  badger:
+    ephemeral: false
+    directory-key: /badger/key
+    directory-value: /badger/data
+    span-store-ttl: 168h  # 7 days retention
+
+  # For production, use Elasticsearch
+  # elasticsearch:
+  #   server-urls: http://elasticsearch:9200
+  #   index-prefix: jaeger
+  #   create-index-templates: true
+
+# Sampling configuration
+sampling:
+  strategies-file: /etc/jaeger/sampling.json
+
+# Ingestion rate limiting
+collector-queue-size: 2000
+collector-num-workers: 50
+
+# Metrics
+admin:
+  http:
+    host-port: ":14269"
+
+metrics:
+  backend: prometheus

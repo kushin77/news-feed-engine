@@ -1,0 +1,28 @@
+# ElevatedIQ News Feed Engine - Grafana Datasources
+# Auto-provisioned datasources for Grafana
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://elevatediq-prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "15s"
+      httpMethod: POST
+
+  - name: PostgreSQL
+    type: postgres
+    url: elevatediq-postgres:5432
+    database: news_feed
+    user: ${ELEVATEDIQ_DATABASE_USER:-postgres}
+    secureJsonData:
+      password: ${ELEVATEDIQ_DATABASE_PASSWORD:-postgres}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      maxIdleConns: 5
+      connMaxLifetime: 14400

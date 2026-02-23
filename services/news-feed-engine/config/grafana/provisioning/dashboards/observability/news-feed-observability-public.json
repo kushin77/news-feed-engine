@@ -1,0 +1,254 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.2.2" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "8.5.0" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "8.5.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "2.0.0" }
+  ],
+  "title": "News Feed Observability (Public)",
+  "uid": "news-feed-observability-public",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["news-feed", "observability", "public"],
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "templating": { "list": [] },
+  "annotations": {
+    "list": [
+      {
+        "datasource": "Prometheus",
+        "enable": true,
+        "expr": "ALERTS{alertname=~\".*NewsFeed.*\"}",
+        "name": "Alerts",
+        "titleFormat": "Alert: {{ alertname }}"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Service Availability",
+      "description": "Percentage of time services are up",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "orange", "value": 95},
+              {"color": "yellow", "value": 99},
+              {"color": "green", "value": 99.5}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:service_availability"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Success Rate (5m)",
+      "description": "Processor message success rate",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "orange", "value": 0.90},
+              {"color": "yellow", "value": 0.95},
+              {"color": "green", "value": 0.98}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:processor_success_rate5m"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "HTTP Probe Success",
+      "description": "Blackbox probe success rate",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "orange", "value": 0.95},
+              {"color": "green", "value": 0.99}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:http_probe_success_rate"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "P95 Processing Time",
+      "description": "95th percentile processing latency",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 3,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 2},
+              {"color": "red", "value": 3}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:processing_p95_seconds"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate (5m)",
+      "description": "Processor error rate over time",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:processor_error_rate5m", "legendFormat": "Error Rate"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Success Rate Trend",
+      "description": "Processor success rate over time",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:processor_success_rate5m", "legendFormat": "Success Rate"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Kafka Availability",
+      "gridPos": { "x": 0, "y": 12, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:kafka_availability"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Postgres Availability",
+      "gridPos": { "x": 6, "y": 12, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:postgres_availability"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Redis Availability",
+      "gridPos": { "x": 12, "y": 12, "w": 6, "h": 4 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:redis_availability"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Processing Latency (P95/P99)",
+      "description": "95th and 99th percentile processing time",
+      "gridPos": { "x": 0, "y": 16, "w": 24, "h": 8 },
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "fillOpacity": 10
+          }
+        }
+      },
+      "targets": [
+        {"refId": "A", "expr": "job:news_feed:processing_p95_seconds", "legendFormat": "P95"},
+        {"refId": "B", "expr": "job:news_feed:processing_p99_seconds", "legendFormat": "P99"}
+      ]
+    }
+  ]
+}

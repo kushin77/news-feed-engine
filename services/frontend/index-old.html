@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="ElevatedIQ - The operating system for tech companies. Security, Marketing, and DevOps automation powered by AI. Replace 5 tools with one platform.">
+    <meta name="keywords" content="security automation, AI marketing, DevOps platform, SAST DAST SCA, enterprise security, marketing automation">
+    <meta name="theme-color" content="#0F172A">
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ElevatedIQ - Security, Marketing & DevOps Automation Platform">
+    <meta property="og:description" content="The only platform combining AI security, marketing automation, and DevOps. $131K ARR in 5 weeks.">
+    <meta property="og:image" content="/og-image.png">
+
+    <!-- Mobile optimization -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ElevatedIQ">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>⚡</text></svg>">
+
+    <title>ElevatedIQ - The Operating System for Tech Companies</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #F8FAFC;
+            background: #0F172A;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .hero {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 3rem 2rem;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            margin-bottom: 1rem;
+            color: #1a202c;
+            line-height: 1.3;
+            word-wrap: break-word;
+        }
+
+        .tagline {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: #4a5568;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature {
+            padding: 1.5rem;
+            background: #f7fafc;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* Touch device optimization */
+        @media (hover: none) {
+            .feature:active {
+                transform: scale(0.98);
+            }
+        }
+
+        .feature-icon {
+            font-size: clamp(2rem, 5vw, 2.5rem);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .feature h3 {
+            font-size: clamp(1.1rem, 2.5vw, 1.25rem);
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+            line-height: 1.3;
+        }
+
+        .feature p {
+            color: #718096;
+            font-size: clamp(0.875rem, 2vw, 0.95rem);
+            line-height: 1.5;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            min-width: 160px;
+            text-align: center;
+            /* Touch optimization */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Touch device optimization */
+        @media (hover: none) {
+            .btn-primary:active {
+                transform: scale(0.97);
+            }
+            .btn-secondary:active {
+                transform: scale(0.97);
+            }
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .status {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            color: #48bb78;
+            font-weight: 500;
+            flex-wrap: wrap;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #48bb78;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            line-height: 1.6;
+        }
+
+        .footer p {
+            margin: 0.5rem 0;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .container {
+                padding: 0.5rem;
+            }
+
+            .hero {
+                padding: 2rem 1.5rem;
+                border-radius: 15px;
+            }
+
+            .features {
+                gap: 1rem;
+                margin: 1.5rem 0;
+            }
+
+            .feature {
+                padding: 1.25rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 0.875rem 1.5rem;
+            }
+
+            .status {
+                font-size: 0.875rem;
+            }
+
+            .status span {
+                text-align: center;
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .hero {
+                padding: 1.5rem 1rem;
+            }
+
+            .logo {
+                margin-bottom: 0.75rem;
+            }
+
+            h1 {
+                margin-bottom: 0.75rem;
+            }
+
+            .tagline {
+                margin-bottom: 1.5rem;
+            }
+
+            .features {
+                margin: 1rem 0;
+            }
+
+            .feature {
+                padding: 1rem;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            body {
+                padding: 1rem 2rem;
+            }
+
+            .hero {
+                padding: 2rem;
+            }
+
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .hero {
+                box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            /* Keep light theme - brand identity */
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <div class="logo">ElevatedIQ.ai</div>
+            <h1>The ONLY AI Platform That Secures, Markets & Operates Your Entire Stack</h1>
+            <p class="tagline">Security + Marketing + DevOps Automation — Three Products, One Platform</p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Fort Knox Code Vault</h3>
+                    <p>Universal security audits: SAST/DAST/SCA with AI threat detection across 1,000+ sectors</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Marketing Manager AI</h3>
+                    <p>Your personal 50-person creative agency: content, video, voice cloning, auto-posting</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🚀</div>
+                    <h3>DevOps Suite (rrctl)</h3>
+                    <p>Complete CI/CD automation with 8 specialized AI agents for every role</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI Agent Ecosystem</h3>
+                    <p>IT Oracle, Security Analyst, DevOps Engineer, QA Troubleshooter & more</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📈</div>
+                    <h3>Trading Bot</h3>
+                    <p>AI-powered crypto trading across 12 exchanges with Ollama intelligence</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🏪</div>
+                    <h3>PureBliss Suite</h3>
+                    <p>Complete business management system with integrated operations</p>
+                </div>
+            </div>
+
+            <div class="cta-buttons">
+                <a href="/admin" class="btn btn-primary">Access Admin Portal →</a>
+                <a href="https://elevatediq.ai" class="btn btn-secondary" target="_blank">Learn More</a>
+            </div>
+
+            <div class="status">
+                <div class="status-dot"></div>
+                <span>All Systems Operational | $131K ARR | 5 Weeks</span>
+            </div>
+
+            <div class="footer">
+                <p>&copy; 2025 ElevatedIQ.ai — "Hack Me If You Can" — Because we're unhackable, and we'll prove it.</p>
+                <p>Built with ❤️ and 🔥 | Security + Marketing + DevOps in One Platform</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

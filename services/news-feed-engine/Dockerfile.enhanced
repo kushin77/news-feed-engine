@@ -1,0 +1,113 @@
+# ElevatedIQ News Feed Engine - Elite AI Enhanced Dockerfile
+# Multi-stage build with Python processor support
+
+# ============================================================================
+# Stage 1: Go Builder
+# ============================================================================
+FROM golang:1.24-alpine AS go-builder
+
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates tzdata
+
+WORKDIR /app
+
+# Copy go mod files first for better caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY cmd/ cmd/
+COPY internal/ internal/
+COPY pkg/ pkg/
+
+# Build the binary with version info
+ARG VERSION=dev
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-w -s -X main.version=${VERSION}" \
+    -o /app/news-feed-engine \
+    ./cmd/news-feed
+
+# ============================================================================
+# Stage 2: Python Builder (for processor modules)
+# ============================================================================
+FROM python:3.11-slim AS python-builder
+
+WORKDIR /app/processor
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python dependencies
+COPY data/processors/requirements.txt ./
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Copy processor source
+COPY data/processors/ ./
+
+# ============================================================================
+# Stage 3: Production Image
+# ============================================================================
+FROM python:3.11-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    tzdata \
+    curl \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -g 1001 elevatediq && \
+    useradd -u 1001 -g elevatediq -s /bin/bash -m elevatediq
+
+WORKDIR /app
+
+# Copy Go binary
+COPY --from=go-builder /app/news-feed-engine /app/
+
+# Copy Python packages and processor
+COPY --from=python-builder /root/.local /home/elevatediq/.local
+COPY --from=python-builder /app/processor /app/processor
+
+# Copy migrations and config
+COPY migrations /app/migrations
+COPY config /app/config
+
+# Set Python path
+ENV PATH="/home/elevatediq/.local/bin:$PATH"
+ENV PYTHONPATH="/app/processor"
+
+# Set ownership
+RUN chown -R elevatediq:elevatediq /app
+
+# Switch to non-root user
+USER elevatediq
+
+# Expose ports
+EXPOSE 8080 8081 9090
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Environment variables
+ENV ELEVATEDIQ_ENVIRONMENT=production \
+    PORT=8080 \
+    METRICS_PORT=9090 \
+    PROCESSOR_PORT=8081 \
+    LOG_LEVEL=info \
+    TZ=UTC
+
+# Labels for container metadata
+LABEL org.opencontainers.image.title="News Feed Engine" \
+      org.opencontainers.image.description="ElevatedIQ News Feed Engine with Elite AI Enhancements" \
+      org.opencontainers.image.vendor="ElevatedIQ" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.source="https://github.com/elevatediq/news-feed-engine"
+
+# Run the binary
+ENTRYPOINT ["/app/news-feed-engine"]

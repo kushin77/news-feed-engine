@@ -1,0 +1,81 @@
+# Prometheus alerts for News Feed Engine (Go service)
+
+groups:
+  - name: news-feed-engine-alerts
+    interval: 30s
+    rules:
+      - alert: NewsFeedEngineDown
+        expr: up{job="news-feed-engine"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: news-feed-engine
+        annotations:
+          summary: "News Feed Engine target is down"
+          description: |
+            Prometheus reports the news-feed-engine target as down for 2 minutes.
+            Check container status, logs, and network connectivity.
+
+      - alert: NewsFeedKafkaConsumerLagHigh
+        expr: |
+          sum by (consumergroup) (
+            kafka_consumergroup_lag{consumergroup="news-feed-processor"}
+          ) > 10000
+        for: 10m
+        labels:
+          severity: warning
+          service: news-feed-processor
+        annotations:
+          summary: "Kafka consumer lag high (>10k messages)"
+          description: |
+            The news-feed-processor consumer group lag exceeded 10,000 messages for 10 minutes.
+            Investigate processor throughput, Kafka health, and downstream backpressure.
+
+      - alert: NewsFeedPostgresDown
+        expr: pg_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: news-feed-postgres
+        annotations:
+          summary: "PostgreSQL exporter reports database down"
+          description: |
+            The PostgreSQL exporter indicates the database is down for at least 2 minutes.
+            Check container, credentials, and network connectivity.
+
+      - alert: NewsFeedRedisDown
+        expr: redis_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: news-feed-redis
+        annotations:
+          summary: "Redis exporter reports instance down"
+          description: |
+            The Redis exporter indicates the Redis instance is down for at least 2 minutes.
+            Check container and network connectivity.
+
+      - alert: NewsFeedHTTPProbeFail
+        expr: probe_success == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: news-feed
+        annotations:
+          summary: "HTTP probe failed for {{ $labels.instance }}"
+          description: |
+            Blackbox probe failed for target {{ $labels.instance }} for at least 2 minutes.
+            Investigate service availability and network connectivity.
+
+      - alert: NewsFeedExporterTargetDown
+        expr: |
+          sum by (job) (up{job=~"kafka-exporter|postgres-exporter|redis-exporter|blackbox-http"} == 0) > 0
+        for: 2m
+        labels:
+          severity: warning
+          service: news-feed-infra
+        annotations:
+          summary: "Exporter or probe target down (job={{ $labels.job }})"
+          description: |
+            One or more targets for job {{ $labels.job }} have been down for at least 2 minutes.
+            Check the corresponding exporter or blackbox exporter service and network.

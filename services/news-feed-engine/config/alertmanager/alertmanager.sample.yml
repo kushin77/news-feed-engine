@@ -1,0 +1,53 @@
+# Alertmanager configuration example with real routing
+# Copy this file to alertmanager.yml and replace placeholders with real values
+# Then set ALERTMANAGER_CONFIG_FILE=./services/news-feed-engine/config/alertmanager/alertmanager.yml
+# when running docker compose to enable it.
+
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'service']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 3h
+  receiver: 'slack'
+  routes:
+    - matchers:
+        - severity = critical
+      receiver: 'pagerduty'
+    - matchers:
+        - severity = warning
+      receiver: 'slack'
+    - matchers:
+        - severity = info
+      receiver: 'email'
+
+receivers:
+  - name: 'slack'
+    slack_configs:
+      - api_url: 'REPLACE_WITH_SLACK_WEBHOOK_URL'
+        send_resolved: true
+        channel: '#alerts'
+        title: '{{ .CommonLabels.alertname }} {{ .Status | toUpper }}'
+        text: >-
+          *Environment:* {{ .CommonLabels.environment }}\n
+          *Service:* {{ .CommonLabels.service }}\n
+          *Severity:* {{ .CommonLabels.severity }}\n
+          *Summary:* {{ .CommonAnnotations.summary }}\n
+          *Description:* {{ .CommonAnnotations.description }}
+
+  - name: 'pagerduty'
+    pagerduty_configs:
+      - routing_key: 'REPLACE_WITH_PAGERDUTY_ROUTING_KEY'
+        severity: '{{ .CommonLabels.severity | default "error" }}'
+        send_resolved: true
+
+  - name: 'email'
+    email_configs:
+      - to: 'ops@example.com'
+        from: 'alertmanager@example.com'
+        smarthost: 'smtp.example.com:587'
+        auth_username: 'REPLACE_WITH_SMTP_USER'
+        auth_password: 'REPLACE_WITH_SMTP_PASSWORD'
+        require_tls: true

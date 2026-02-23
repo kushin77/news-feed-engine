@@ -1,0 +1,69 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.2.2" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "8.5.0" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "8.5.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "2.0.0" }
+  ],
+  "title": "News Feed Infra",
+  "uid": "news-feed-infra",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["news-feed", "infra"],
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "HTTP Probe Success (engine)",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "none", "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "targets": [
+        {"refId": "A", "expr": "max(probe_success{job=\"blackbox-http\", instance=\"http://elevatediq-news-feed-engine:8080/health\"})"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "HTTP Probe Success (processor)",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "none", "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "targets": [
+        {"refId": "A", "expr": "max(probe_success{job=\"blackbox-http\", instance=\"http://elevatediq-news-feed-processor:9090/\"})"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Kafka Consumer Lag (processor)",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 5000}, {"color": "red", "value": 10000}]}}},
+      "targets": [
+        {"refId": "A", "expr": "sum(kafka_consumergroup_lag{consumergroup=\"news-feed-processor\"})"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Postgres Up",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "none", "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "targets": [
+        {"refId": "A", "expr": "max(pg_up)"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Redis Up",
+      "gridPos": { "x": 0, "y": 6, "w": 6, "h": 6 },
+      "datasource": "Prometheus",
+      "fieldConfig": {"defaults": {"unit": "none", "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "targets": [
+        {"refId": "A", "expr": "max(redis_up)"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+Metadata-Version: 2.4
+Name: processor
+Version: 2.0.0
+Summary: ElevatedIQ News Feed Engine - Elite AI Processor
+Requires-Python: >=3.11
+Requires-Dist: anthropic>=0.40.0
+Requires-Dist: httpx>=0.28.0
+Requires-Dist: pydantic>=2.7.0
+Requires-Dist: pydantic-settings>=2.2.0
+Requires-Dist: redis>=5.0.0
+Requires-Dist: prometheus-client>=0.21.0
+Requires-Dist: kafka-python>=2.0.2
+Requires-Dist: structlog>=24.4.0
+Requires-Dist: tenacity>=9.0.0
+Requires-Dist: numpy>=1.26.4
+Requires-Dist: aiohttp>=3.9.4
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.23.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.1.0; extra == "dev"
+Requires-Dist: mypy>=1.8.0; extra == "dev"
+Requires-Dist: ruff>=0.3.0; extra == "dev"

@@ -1,0 +1,111 @@
+# ElevatedIQ News Feed Engine - Load Testing Docker Compose
+# Locust-based performance testing with distributed workers
+#
+# Usage:
+#   # Single mode
+#   docker compose -f docker-compose.load-test.yml up load-tester
+#
+#   # Distributed mode (1 master + 4 workers)
+#   docker compose -f docker-compose.load-test.yml --profile distributed up
+#
+#   # Access Locust Web UI: http://127.0.0.1:8089
+
+services:
+  # Single Mode Load Tester
+  load-tester:
+    image: locustio/locust:2.20.1
+    container_name: elevatediq-load-tester
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./tests/performance:/mnt/locust:ro
+      - ./reports:/reports
+    environment:
+      TARGET_HOST: ${TARGET_HOST:-http://elevatediq-news-feed-engine:8080}
+    networks:
+      - elevatediq-net
+    command: >
+      -f /mnt/locust/locustfile.py
+      --host=${TARGET_HOST:-http://elevatediq-news-feed-engine:8080}
+      --web-host=0.0.0.0
+    labels:
+      com.elevatediq.service: load-tester
+      com.elevatediq.component: testing
+
+  # Headless Load Tester (for CI/CD)
+  load-tester-ci:
+    image: locustio/locust:2.20.1
+    container_name: elevatediq-load-tester-ci
+    profiles:
+      - ci
+    volumes:
+      - ./tests/performance:/mnt/locust:ro
+      - ./reports:/reports
+    environment:
+      TARGET_HOST: ${TARGET_HOST:-http://elevatediq-news-feed-engine:8080}
+      LOCUST_USERS: ${LOCUST_USERS:-100}
+      LOCUST_SPAWN_RATE: ${LOCUST_SPAWN_RATE:-10}
+      LOCUST_RUN_TIME: ${LOCUST_RUN_TIME:-60s}
+    networks:
+      - elevatediq-net
+    command: >
+      -f /mnt/locust/locustfile.py
+      --host=${TARGET_HOST:-http://elevatediq-news-feed-engine:8080}
+      --headless
+      --users=${LOCUST_USERS:-100}
+      --spawn-rate=${LOCUST_SPAWN_RATE:-10}
+      --run-time=${LOCUST_RUN_TIME:-60s}
+      --csv=/reports/load-test
+      --html=/reports/load-test-report.html
+    labels:
+      com.elevatediq.service: load-tester-ci
+      com.elevatediq.component: testing
+
+  # Distributed Master
+  load-tester-master:
+    image: locustio/locust:2.20.1
+    container_name: elevatediq-load-master
+    profiles:
+      - distributed
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./tests/performance:/mnt/locust:ro
+      - ./reports:/reports
+    networks:
+      - elevatediq-net
+    command: >
+      -f /mnt/locust/locustfile.py
+      --master
+      --host=${TARGET_HOST:-http://elevatediq-news-feed-engine:8080}
+      --web-host=0.0.0.0
+      --expect-workers=4
+    labels:
+      com.elevatediq.service: load-master
+      com.elevatediq.component: testing
+
+  # Distributed Workers (scaled via --scale)
+  load-tester-worker:
+    image: locustio/locust:2.20.1
+    profiles:
+      - distributed
+    volumes:
+      - ./tests/performance:/mnt/locust:ro
+    networks:
+      - elevatediq-net
+    depends_on:
+      - load-tester-master
+    command: >
+      -f /mnt/locust/locustfile.py
+      --worker
+      --master-host=load-tester-master
+    deploy:
+      replicas: 4
+    labels:
+      com.elevatediq.service: load-worker
+      com.elevatediq.component: testing
+
+networks:
+  elevatediq-net:
+    name: elevatediq-net
+    external: true

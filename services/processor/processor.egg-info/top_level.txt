@@ -1,0 +1,5 @@
+docs
+htmlcov
+processor
+tests
+venv

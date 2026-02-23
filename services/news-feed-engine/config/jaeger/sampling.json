@@ -1,0 +1,52 @@
+{
+  "service_strategies": [
+    {
+      "service": "news-feed-engine",
+      "type": "probabilistic",
+      "param": 0.5,
+      "operation_strategies": [
+        {
+          "operation": "GET /health",
+          "type": "probabilistic",
+          "param": 0.01
+        },
+        {
+          "operation": "GET /metrics",
+          "type": "probabilistic",
+          "param": 0.01
+        },
+        {
+          "operation": "POST /api/content/ingest",
+          "type": "probabilistic",
+          "param": 1.0
+        },
+        {
+          "operation": "POST /api/video/generate",
+          "type": "probabilistic",
+          "param": 1.0
+        }
+      ]
+    },
+    {
+      "service": "news-feed-processor",
+      "type": "probabilistic",
+      "param": 0.5,
+      "operation_strategies": [
+        {
+          "operation": "process_content",
+          "type": "probabilistic",
+          "param": 1.0
+        },
+        {
+          "operation": "analyze_sentiment",
+          "type": "probabilistic",
+          "param": 1.0
+        }
+      ]
+    }
+  ],
+  "default_strategy": {
+    "type": "probabilistic",
+    "param": 0.1
+  }
+}

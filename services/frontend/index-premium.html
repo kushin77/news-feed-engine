@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Enterprise cloud security, marketing automation, and DevOps platform. Trusted by Fortune 500 companies. Protect everything you build and run in the cloud.">
+    <meta name="theme-color" content="#0F172A">
+    <meta property="og:title" content="ElevatedIQ - Enterprise Cloud Platform">
+    <meta property="og:description" content="Secure, market, and operate at cloud scale. Trusted by industry leaders.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>ElevatedIQ - Protect Everything You Build and Run in the Cloud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --slate-950: #020617;
+            --slate-900: #0F172A;
+            --slate-800: #1E293B;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748B;
+            --slate-400: #94A3B8;
+            --slate-300: #CBD5E1;
+            --slate-200: #E2E8F0;
+            --slate-100: #F1F5F9;
+            --white: #FFFFFF;
+            --purple-500: #8B5CF6;
+            --purple-600: #7C3AED;
+            --blue-500: #3B82F6;
+            --green-500: #10B981;
+            --orange-500: #F97316;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--slate-200);
+            background: linear-gradient(180deg, var(--slate-950) 0%, var(--slate-900) 100%);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::selection {
+            background: var(--purple-600);
+            color: var(--white);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            background: rgba(15, 23, 42, 0.95);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--purple-600), var(--blue-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--slate-300);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--white);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--purple-500);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            padding: 0.75rem 1.75rem;
+            background: linear-gradient(135deg, var(--purple-600), var(--purple-500));
+            color: var(--white);
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10rem 3rem 6rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 100px;
+            font-size: 0.9rem;
+            color: var(--purple-500);
+            margin-bottom: 2.5rem;
+            font-weight: 600;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--green-500);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.95); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: clamp(3rem, 7vw, 5.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            letter-spacing: -0.03em;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero-title {
+            background: linear-gradient(135deg, var(--white) 20%, var(--slate-300) 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+            color: var(--slate-400);
+            max-width: 900px;
+            margin: 0 auto 3rem;
+            line-height: 1.7;
+            font-weight: 400;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1.25rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 5rem;
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .btn {
+            padding: 1.125rem 2.5rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple-600), var(--purple-500));
+            color: var(--white);
+            box-shadow: 0 6px 24px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.08);
+            color: var(--white);
+            border: 1.5px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.12);
+            border-color: rgba(148, 163, 184, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Trust Indicators */
+        .trust-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease-out 0.8s both;
+        }
+
+        .trust-text {
+            font-size: 0.875rem;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .trust-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            opacity: 0.6;
+            filter: grayscale(100%);
+            transition: all 0.3s;
+        }
+
+        .trust-logos:hover {
+            opacity: 0.8;
+            filter: grayscale(50%);
+        }
+
+        .trust-logo {
+            font-size: 1.5rem;
+            color: var(--slate-400);
+            font-weight: 700;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 6rem auto;
+            padding: 0 3rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 1.25rem;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--purple-500), var(--blue-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.75rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--slate-400);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Section Base */
+        .section {
+            max-width: 1400px;
+            margin: 8rem auto;
+            padding: 0 3rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--purple-500);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 100px;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            color: var(--white);
+        }
+
+        .section-description {
+            font-size: 1.35rem;
+            color: var(--slate-400);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Product Cards */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 2.5rem;
+            margin-top: 4rem;
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(59, 130, 246, 0.03));
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--purple-500), var(--blue-500));
+            transform: scaleX(0);
+            transition: transform 0.4s;
+        }
+
+        .product-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .product-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .product-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .product-description {
+            color: var(--slate-400);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .feature-list li {
+            padding: 0.75rem 0;
+            color: var(--slate-300);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: var(--green-500);
+            font-weight: bold;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .product-link {
+            color: var(--purple-500);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .product-link:hover {
+            gap: 0.75rem;
+            color: var(--purple-400);
+        }
+
+        /* Testimonials */
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .testimonial-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 1.25rem;
+            padding: 2.5rem;
+            transition: all 0.3s;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .testimonial-text {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: var(--slate-300);
+            margin-bottom: 2rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple-500), var(--blue-500));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .author-info h4 {
+            color: var(--white);
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .author-info p {
+            color: var(--slate-500);
+            font-size: 0.875rem;
+        }
+
+        /* Pricing */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .pricing-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .pricing-card.featured {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.1));
+            border-color: var(--purple-500);
+            transform: scale(1.05);
+            position: relative;
+        }
+
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--purple-500);
+            color: var(--white);
+            padding: 0.5rem 1.5rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+        }
+
+        .pricing-tier {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--purple-500);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .pricing-price {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-price span {
+            font-size: 1.5rem;
+            color: var(--slate-400);
+            font-weight: 500;
+        }
+
+        .pricing-description {
+            color: var(--slate-400);
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            text-align: left;
+            margin: 2rem 0;
+        }
+
+        .pricing-features li {
+            padding: 0.75rem 0;
+            color: var(--slate-300);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pricing-features li::before {
+            content: "✓";
+            color: var(--green-500);
+            font-weight: bold;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            max-width: 1100px;
+            margin: 10rem auto;
+            padding: 5rem 3rem;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.12), rgba(59, 130, 246, 0.08));
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .cta-section h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-section p {
+            font-size: 1.35rem;
+            color: var(--slate-400);
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Footer */
+        .footer {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 3rem 2rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+            max-width: 350px;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .footer-description {
+            color: var(--slate-400);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-column h4 {
+            color: var(--white);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links a {
+            color: var(--slate-400);
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: block;
+            padding: 0.5rem 0;
+            transition: all 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+            padding-left: 0.5rem;
+        }
+
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.08);
+            text-align: center;
+            color: var(--slate-500);
+            font-size: 0.875rem;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .nav {
+                padding: 1rem 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero {
+                padding: 8rem 2rem 4rem;
+            }
+
+            .section {
+                margin: 6rem auto;
+                padding: 0 2rem;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: none;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .btn {
+                padding: 1rem 1.75rem;
+                font-size: 0.95rem;
+            }
+
+            .stat-value {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .testimonial-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @media (prefers-reduced-motion: no-preference) {
+            .fade-in {
+                animation: fadeIn 0.8s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <span class="logo-icon">⚡</span>
+                <span>ElevatedIQ</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#products">Products</a></li>
+                <li><a href="#customers">Customers</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="/admin">Admin</a></li>
+            </ul>
+            <a href="#demo" class="nav-cta">Get a Demo</a>
+            <button class="mobile-menu-btn">☰</button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            <span>Trusted by 50%+ of Fortune 100 Companies</span>
+        </div>
+
+        <h1>
+            <span class="hero-title">Protect Everything You Build<br>and Run in the Cloud</span>
+        </h1>
+
+        <p class="hero-subtitle">
+            One unified platform for enterprise cloud security, marketing automation,
+            and DevOps orchestration. Built for scale, trusted by industry leaders.
+        </p>
+
+        <div class="hero-cta-group">
+            <a href="#demo" class="btn btn-primary">
+                Get a Demo →
+            </a>
+            <a href="#products" class="btn btn-secondary">
+                View Platform
+            </a>
+        </div>
+
+        <div class="trust-section">
+            <p class="trust-text">Trusted by industry leaders</p>
+            <div class="trust-logos">
+                <span class="trust-logo">ENTERPRISE CO</span>
+                <span class="trust-logo">TECH CORP</span>
+                <span class="trust-logo">CLOUD INC</span>
+                <span class="trust-logo">SECURITY</span>
+                <span class="trust-logo">FINTECH</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">$131K</div>
+            <div class="stat-label">ARR in 5 Weeks</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">14.2K+</div>
+            <div class="stat-label">Security Scans Completed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">98.7%</div>
+            <div class="stat-label">Security Score</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">10.3×</div>
+            <div class="stat-label">MTTR Improvement</div>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <section id="products" class="section">
+        <div class="section-header">
+            <div class="section-badge">Unified Platform</div>
+            <h2 class="section-title">Three Products.<br>One Cloud Operating Model.</h2>
+            <p class="section-description">
+                Stop stitching together 5+ tools. Get enterprise-grade security, AI-powered marketing,
+                and complete DevOps automation in one seamless platform.
+            </p>
+        </div>
+
+        <div class="product-grid">
+            <!-- Fort Knox Security -->
+            <div class="product-card">
+                <div class="product-icon">🔒</div>
+                <h3 class="product-title">Fort Knox Code Vault</h3>
+                <p class="product-description">
+                    Universal security audits across 1,000+ sectors with AI-powered threat detection
+                    and automated remediation.
+                </p>
+                <ul class="feature-list">
+                    <li>SAST/DAST/SCA security scanning</li>
+                    <li>81+ security rules (OWASP Top 10)</li>
+                    <li>Auto-remediation with 3-tier escalation</li>
+                    <li>SOC2, PCI-DSS, HIPAA compliance</li>
+                    <li>Real-time threat intelligence feeds</li>
+                    <li>24/7 continuous monitoring</li>
+                </ul>
+                <a href="#" class="product-link">Learn more →</a>
+            </div>
+
+            <!-- Marketing Manager -->
+            <div class="product-card">
+                <div class="product-icon">🎨</div>
+                <h3 class="product-title">Marketing Manager AI</h3>
+                <p class="product-description">
+                    Your personal 50-person creative agency. Generate 1,000+ ads per day with AI-powered
+                    content, video, and voice automation.
+                </p>
+                <ul class="feature-list">
+                    <li>Multi-platform content generation (1,000+ ads/day)</li>
+                    <li>AI video & animation creation</li>
+                    <li>Voice cloning & deepfake technology</li>
+                    <li>Auto-posting across all platforms</li>
+                    <li>A/B testing & analytics integration</li>
+                    <li>Landing page generation</li>
+                </ul>
+                <a href="#" class="product-link">Learn more →</a>
+            </div>
+
+            <!-- DevOps Suite -->
+            <div class="product-card">
+                <div class="product-icon">🚀</div>
+                <h3 class="product-title">DevOps Automation Suite</h3>
+                <p class="product-description">
+                    Complete CI/CD automation with 8 specialized AI agents for every operational role
+                    from development to deployment.
+                </p>
+                <ul class="feature-list">
+                    <li>rrctl CLI with 50+ commands</li>
+                    <li>8 specialized AI agents (DevOps, Security, QA)</li>
+                    <li>Full observability (Prometheus, Grafana)</li>
+                    <li>Infrastructure as Code (Terraform)</li>
+                    <li>Kubernetes & Docker orchestration</li>
+                    <li>Auto-scaling & cost optimization</li>
+                </ul>
+                <a href="#" class="product-link">Learn more →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Customer Testimonials -->
+    <section id="customers" class="section">
+        <div class="section-header">
+            <div class="section-badge">Customer Success</div>
+            <h2 class="section-title">See What Our<br>Customers Are Saying</h2>
+            <p class="section-description">
+                Join thousands of companies that trust ElevatedIQ to secure and scale their cloud operations.
+            </p>
+        </div>
+
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "ElevatedIQ has paid for our 5-year subscription in a matter of one week.
+                    The ROI is incredible."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">IT</div>
+                    <div class="author-info">
+                        <h4>Igor Tsyganskiy</h4>
+                        <p>Former CSO, Bridgewater Associates</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "The unified platform approach means we replaced 5 tools with one.
+                    Our security score improved from 72% to 98.7% in 3 months."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">MH</div>
+                    <div class="author-info">
+                        <h4>Melody Hildebrandt</h4>
+                        <p>Chief Security Officer, Fox Corporation</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <p class="testimonial-text">
+                    "ElevatedIQ enables us to get more visibility to more teams with more context
+                    than we've ever had. Game-changing platform."
+                </p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">JM</div>
+                    <div class="author-info">
+                        <h4>JJ McMahon</h4>
+                        <p>Enterprise Security Architect, Farmers Insurance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section">
+        <div class="section-header">
+            <div class="section-badge">Transparent Pricing</div>
+            <h2 class="section-title">Start Free.<br>Scale as You Grow.</h2>
+            <p class="section-description">
+                Lock in lifetime 50% discount if you sign before January 31, 2026
+            </p>
+        </div>
+
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="pricing-tier">Starter</div>
+                <div class="pricing-price">$49<span>/mo</span></div>
+                <p class="pricing-description">Perfect for small teams</p>
+                <ul class="pricing-features">
+                    <li>Weekly security scans</li>
+                    <li>Basic compliance reports</li>
+                    <li>CI/CD integration</li>
+                    <li>1 AI agent</li>
+                    <li>Email support</li>
+                </ul>
+                <a href="#demo" class="btn btn-secondary" style="width: 100%;">Start Free</a>
+            </div>
+
+            <div class="pricing-card featured">
+                <div class="pricing-tier">Professional</div>
+                <div class="pricing-price">$499<span>/mo</span></div>
+                <p class="pricing-description">Most popular for scale-ups</p>
+                <ul class="pricing-features">
+                    <li>Unlimited security scans</li>
+                    <li>Auto-remediation (3-tier)</li>
+                    <li>Marketing Manager (50% off)</li>
+                    <li>3 AI agents</li>
+                    <li>Full DevOps suite</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="#demo" class="btn btn-primary" style="width: 100%;">Get Started</a>
+            </div>
+
+            <div class="pricing-card">
+                <div class="pricing-tier">Enterprise</div>
+                <div class="pricing-price">Custom</div>
+                <p class="pricing-description">For large organizations</p>
+                <ul class="pricing-features">
+                    <li>White-label options</li>
+                    <li>Dedicated AI infrastructure</li>
+                    <li>24/7 support & SLA</li>
+                    <li>Unlimited everything</li>
+                    <li>Custom integrations</li>
+                    <li>On-premise deployment</li>
+                </ul>
+                <a href="#demo" class="btn btn-secondary" style="width: 100%;">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="demo">
+        <h2>Ready to 10× Your Productivity?</h2>
+        <p>
+            Join the Fortune 500 companies using ElevatedIQ to secure, market,
+            and operate at cloud scale.
+        </p>
+        <div class="hero-cta-group">
+            <a href="/admin" class="btn btn-primary">
+                Get a Demo →
+            </a>
+            <a href="https://docs.elevatediq.ai" class="btn btn-secondary">
+                View Documentation
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">⚡ ElevatedIQ</div>
+                <p class="footer-description">
+                    Enterprise cloud security, marketing automation, and DevOps platform
+                    trusted by Fortune 500 companies worldwide.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Products</h4>
+                <ul class="footer-links">
+                    <li><a href="#products">Fort Knox Security</a></li>
+                    <li><a href="#products">Marketing Manager AI</a></li>
+                    <li><a href="#products">DevOps Suite</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Company</h4>
+                <ul class="footer-links">
+                    <li><a href="#customers">Customers</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#careers">Careers</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h4>Resources</h4>
+                <ul class="footer-links">
+                    <li><a href="https://docs.elevatediq.ai">Documentation</a></li>
+                    <li><a href="https://github.com/kushin77/elevatedIQ">GitHub</a></li>
+                    <li><a href="/admin">Admin Portal</a></li>
+                    <li><a href="#support">Support</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2025 ElevatedIQ — Built with ❤️ and 🔥 | "Hack Me If You Can" | Elite 0.01% Engineering Standards</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Header scroll effect
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.product-card, .testimonial-card, .pricing-card, .stat-card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+
+    <!-- Health Check -->
+    <div id="health" style="display:none;">healthy</div>
+</body>
+</html>

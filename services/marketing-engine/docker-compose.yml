@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  marketing-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elevatediq-marketing-engine
+    environment:
+      PORT: 8101
+      LOG_LEVEL: INFO
+    ports:
+      - "8101:8101"
+    networks:
+      - elevatediq_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8101/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+
+networks:
+  elevatediq_network:
+    name: elevatediq-net
+    external: true

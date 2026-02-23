@@ -1,0 +1,228 @@
+# ElevatedIQ News Feed Engine - API Configuration
+# NOTE: Use GCP Secret Manager for production. This file is for structure reference only.
+# All values should be populated via environment variables or secret manager.
+
+# =============================================================================
+# AI/ML Services
+# =============================================================================
+ai_services:
+  # Anthropic Claude API
+  anthropic:
+    api_key: ${ANTHROPIC_API_KEY}
+    model: claude-3-5-sonnet-20241022
+    max_tokens: 4096
+
+  # OpenAI (Embeddings)
+  openai:
+    api_key: ${OPENAI_API_KEY}
+    embedding_model: text-embedding-3-small
+
+# =============================================================================
+# Voice & Video Generation
+# =============================================================================
+video_generation:
+  # ElevenLabs Text-to-Speech
+  elevenlabs:
+    api_key: ${ELEVENLABS_API_KEY}
+    base_url: https://api.elevenlabs.io/v1
+    default_voice: professional
+    voices:
+      news_anchor_male: pNInz6obpgDQGcFmaJgB
+      news_anchor_female: 21m00Tcm4TlvDq8ikWAM
+      professional: EXAVITQu4vr4xnSDxMaL
+      casual: MF3mGyEYCl7XYWbV9V6O
+      enthusiastic: jBpfuIE2acCO8z3wKNLl
+    settings:
+      stability: 0.5
+      similarity_boost: 0.75
+
+  # D-ID AI Avatar
+  d_id:
+    api_key: ${DID_API_KEY}
+    base_url: https://api.d-id.com
+    default_avatar: professional_anchor
+    avatars:
+      professional_anchor: amy-jcvszISHVb
+      casual_presenter: josh-MNu4zHfHyE
+      tech_expert: sara-BLVsyNPLKZ
+      news_reporter: anna-KHlzN8TvMc
+    poll_interval: 5  # seconds
+    timeout: 300  # seconds
+
+  # Runway ML (Video Generation)
+  runway:
+    api_key: ${RUNWAY_API_KEY}
+    base_url: https://api.runwayml.com/v1
+
+  # Heygen (Alternative Avatar)
+  heygen:
+    api_key: ${HEYGEN_API_KEY}
+    base_url: https://api.heygen.com/v2
+
+# =============================================================================
+# Media Manager Integration
+# =============================================================================
+media_manager:
+  base_url: ${MEDIA_MANAGER_URL:-http://media-manager:8080}
+  api_key: ${MEDIA_MANAGER_API_KEY}
+  cdn:
+    base_url: ${CDN_BASE_URL:-https://cdn.elevatediq.ai}
+    api_key: ${CDN_API_KEY}
+  storage:
+    provider: gcs  # gcs, s3, azure
+    bucket: ${MEDIA_BUCKET:-elevatediq-media}
+    region: us-central1
+
+# =============================================================================
+# Social Platform APIs
+# =============================================================================
+social_platforms:
+  # YouTube Data API v3
+  youtube:
+    api_key: ${YOUTUBE_API_KEY}
+    client_id: ${YOUTUBE_CLIENT_ID}
+    client_secret: ${YOUTUBE_CLIENT_SECRET}
+    redirect_uri: ${YOUTUBE_REDIRECT_URI:-https://api.elevatediq.ai/oauth/youtube/callback}
+    scopes:
+      - https://www.googleapis.com/auth/youtube.upload
+      - https://www.googleapis.com/auth/youtube.readonly
+      - https://www.googleapis.com/auth/youtubepartner
+
+  # Twitter/X API v2
+  twitter:
+    api_key: ${TWITTER_API_KEY}
+    api_secret: ${TWITTER_API_SECRET}
+    bearer_token: ${TWITTER_BEARER_TOKEN}
+    access_token: ${TWITTER_ACCESS_TOKEN}
+    access_secret: ${TWITTER_ACCESS_SECRET}
+    client_id: ${TWITTER_CLIENT_ID}
+    client_secret: ${TWITTER_CLIENT_SECRET}
+
+  # TikTok API
+  tiktok:
+    client_key: ${TIKTOK_CLIENT_KEY}
+    client_secret: ${TIKTOK_CLIENT_SECRET}
+    redirect_uri: ${TIKTOK_REDIRECT_URI:-https://api.elevatediq.ai/oauth/tiktok/callback}
+
+  # LinkedIn API
+  linkedin:
+    client_id: ${LINKEDIN_CLIENT_ID}
+    client_secret: ${LINKEDIN_CLIENT_SECRET}
+    redirect_uri: ${LINKEDIN_REDIRECT_URI:-https://api.elevatediq.ai/oauth/linkedin/callback}
+
+  # Instagram Graph API
+  instagram:
+    app_id: ${INSTAGRAM_APP_ID}
+    app_secret: ${INSTAGRAM_APP_SECRET}
+    access_token: ${INSTAGRAM_ACCESS_TOKEN}
+
+  # Facebook Graph API
+  facebook:
+    app_id: ${FACEBOOK_APP_ID}
+    app_secret: ${FACEBOOK_APP_SECRET}
+    access_token: ${FACEBOOK_ACCESS_TOKEN}
+
+  # Snapchat Marketing API
+  snapchat:
+    client_id: ${SNAPCHAT_CLIENT_ID}
+    client_secret: ${SNAPCHAT_CLIENT_SECRET}
+    access_token: ${SNAPCHAT_ACCESS_TOKEN}
+
+  # Pinterest API
+  pinterest:
+    app_id: ${PINTEREST_APP_ID}
+    app_secret: ${PINTEREST_APP_SECRET}
+    access_token: ${PINTEREST_ACCESS_TOKEN}
+
+  # Threads API (via Instagram)
+  threads:
+    app_id: ${THREADS_APP_ID}
+    app_secret: ${THREADS_APP_SECRET}
+    access_token: ${THREADS_ACCESS_TOKEN}
+
+# =============================================================================
+# Trend Data Sources
+# =============================================================================
+trend_sources:
+  # Google Trends
+  google_trends:
+    enabled: true
+    refresh_interval: 900  # 15 minutes
+    regions:
+      - US
+      - GLOBAL
+
+  # Reddit
+  reddit:
+    client_id: ${REDDIT_CLIENT_ID}
+    client_secret: ${REDDIT_CLIENT_SECRET}
+    user_agent: ElevatedIQ/1.0
+    subreddits:
+      - technology
+      - business
+      - news
+      - worldnews
+
+  # NewsAPI
+  newsapi:
+    api_key: ${NEWSAPI_API_KEY}
+    sources:
+      - techcrunch
+      - the-verge
+      - wired
+      - bbc-news
+      - reuters
+
+# =============================================================================
+# Infrastructure
+# =============================================================================
+infrastructure:
+  # Kafka
+  kafka:
+    brokers: ${KAFKA_BROKERS:-127.0.0.1:9092}
+    consumer_group: news-feed-engine
+    topics:
+      raw_content: news-feed-raw-content
+      processed_content: news-feed-processed-content
+      video_jobs: news-feed-video-jobs
+      analytics_events: news-feed-analytics-events
+
+  # PostgreSQL
+  postgres:
+    host: ${POSTGRES_HOST:-127.0.0.1}
+    port: ${POSTGRES_PORT:-5432}
+    database: ${POSTGRES_DB:-news_feed}
+    user: ${POSTGRES_USER:-postgres}
+    password: ${POSTGRES_PASSWORD}
+    ssl_mode: ${POSTGRES_SSL:-require}
+
+  # Redis
+  redis:
+    url: ${REDIS_URL:-redis://127.0.0.1:6379/0}
+
+  # MongoDB
+  mongodb:
+    uri: ${MONGO_URI:-mongodb://127.0.0.1:27017/news_feed}
+
+# =============================================================================
+# GCP Secret Manager Mapping
+# =============================================================================
+gcp_secrets:
+  project_id: ${GCP_PROJECT_ID:-elevatediq}
+  secrets:
+    - name: news-feed-anthropic-api-key
+      env_var: ANTHROPIC_API_KEY
+    - name: news-feed-elevenlabs-api-key
+      env_var: ELEVENLABS_API_KEY
+    - name: news-feed-did-api-key
+      env_var: DID_API_KEY
+    - name: news-feed-youtube-api-key
+      env_var: YOUTUBE_API_KEY
+    - name: news-feed-twitter-bearer-token
+      env_var: TWITTER_BEARER_TOKEN
+    - name: news-feed-tiktok-client-secret
+      env_var: TIKTOK_CLIENT_SECRET
+    - name: news-feed-linkedin-client-secret
+      env_var: LINKEDIN_CLIENT_SECRET
+    - name: news-feed-media-manager-api-key
+      env_var: MEDIA_MANAGER_API_KEY

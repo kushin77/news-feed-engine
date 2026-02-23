@@ -1,0 +1,12 @@
+# Grafana dashboard provisioning for News Feed Engine
+apiVersion: 1
+providers:
+  - name: 'News Feed Engine'
+    orgId: 1
+    folder: 'News Feed'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/engine
+      foldersFromFilesStructure: true

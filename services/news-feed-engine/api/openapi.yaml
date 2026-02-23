@@ -1,0 +1,1711 @@
+openapi: 3.1.0
+info:
+  title: ElevatedIQ News Feed Engine API
+  description: |
+    AI-powered news aggregation platform API for multi-platform content ingestion,
+    analysis, and video summary generation. Supports white-label multi-tenant deployment.
+  version: 1.0.0
+  contact:
+    name: ElevatedIQ Platform Team
+    email: platform@elevatediq.ai
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.elevatediq.ai/news-feed/v1
+    description: Production
+  - url: https://staging-api.elevatediq.ai/news-feed/v1
+    description: Staging
+  - url: http://127.0.0.1:8096/api/v1
+    description: Local Development
+
+tags:
+  - name: Content
+    description: Content discovery and retrieval
+  - name: Creators
+    description: Content creator management
+  - name: Videos
+    description: AI-generated video summaries
+  - name: AI
+    description: AI-powered analysis and recommendations
+  - name: Embeddings
+    description: Vector embeddings and semantic search
+  - name: Analytics
+    description: Analytics and insights
+  - name: Admin
+    description: Administrative operations (requires auth)
+  - name: Webhooks
+    description: Platform webhook handlers
+  - name: Health
+    description: Service health endpoints
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /ready:
+    get:
+      tags: [Health]
+      summary: Readiness check
+      operationId: getReadiness
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Service is not ready
+
+  /content:
+    get:
+      tags: [Content]
+      summary: List content
+      operationId: listContent
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/category'
+        - $ref: '#/components/parameters/platform'
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [published_at, engagement_score, quality_score]
+            default: published_at
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: Paginated list of content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentListResponse'
+
+  /content/{id}:
+    get:
+      tags: [Content]
+      summary: Get content by ID
+      operationId: getContent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Content item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /content/category/{category}:
+    get:
+      tags: [Content]
+      summary: Get content by category
+      operationId: getContentByCategory
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Content filtered by category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentListResponse'
+
+  /content/geo/{classification}:
+    get:
+      tags: [Content]
+      summary: Get content by geographic classification
+      operationId: getContentByGeo
+      parameters:
+        - name: classification
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [local, regional, national, global]
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Content filtered by geo classification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentListResponse'
+
+  /content/trending:
+    get:
+      tags: [Content]
+      summary: Get trending content
+      operationId: getTrendingContent
+      parameters:
+        - name: range
+          in: query
+          description: Time range for trending calculation
+          schema:
+            type: string
+            enum: [1h, 6h, 24h, 7d]
+            default: 24h
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Trending content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentListResponse'
+
+  /content/search:
+    get:
+      tags: [Content]
+      summary: Search content (semantic)
+      operationId: searchContent
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/category'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /creators:
+    get:
+      tags: [Creators]
+      summary: List creators
+      operationId: listCreators
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/platform'
+        - name: tier
+          in: query
+          schema:
+            type: string
+            enum: [platinum, gold, silver, bronze, unverified]
+        - name: verified
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Paginated list of creators
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatorListResponse'
+
+  /creators/{id}:
+    get:
+      tags: [Creators]
+      summary: Get creator by ID
+      operationId: getCreator
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Creator details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /creators/{id}/content:
+    get:
+      tags: [Creators]
+      summary: Get creator's content
+      operationId: getCreatorContent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [article, video, post, podcast, newsletter]
+      responses:
+        '200':
+          description: Creator's content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentListResponse'
+
+  /videos:
+    get:
+      tags: [Videos]
+      summary: List video summaries
+      operationId: listVideos
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processing, completed, failed]
+        - $ref: '#/components/parameters/category'
+      responses:
+        '200':
+          description: Paginated list of videos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoListResponse'
+
+  /videos/{id}:
+    get:
+      tags: [Videos]
+      summary: Get video by ID
+      operationId: getVideo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Video details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /videos/{id}/transcript:
+    get:
+      tags: [Videos]
+      summary: Get video transcript
+      operationId: getVideoTranscript
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [text, srt, vtt, json]
+            default: text
+      responses:
+        '200':
+          description: Video transcript
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptResponse'
+            text/plain:
+              schema:
+                type: string
+
+  /ai/analyze:
+    post:
+      tags: [AI]
+      summary: Analyze content with AI
+      operationId: analyzeContent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIAnalysisRequest'
+      responses:
+        '200':
+          description: AI analysis results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIAnalysisResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ai/recommendations:
+    get:
+      tags: [AI]
+      summary: Get personalized recommendations
+      operationId: getRecommendations
+      parameters:
+        - name: user_id
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/limit'
+        - name: categories
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: AI recommendations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationsResponse'
+
+  /ai/summarize:
+    post:
+      tags: [AI]
+      summary: Generate AI summary
+      operationId: summarizeContent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SummarizeRequest'
+      responses:
+        '200':
+          description: AI summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummarizeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ai/sentiment:
+    post:
+      tags: [AI]
+      summary: Analyze sentiment
+      operationId: analyzeSentiment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: Text to analyze
+      responses:
+        '200':
+          description: Sentiment analysis results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentimentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ai/entities:
+    post:
+      tags: [AI]
+      summary: Extract entities from text
+      operationId: extractEntities
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                entity_types:
+                  type: array
+                  items:
+                    type: string
+                    enum: [person, organization, location, product, event, date]
+      responses:
+        '200':
+          description: Extracted entities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntitiesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /embeddings/generate:
+    post:
+      tags: [Embeddings]
+      summary: Generate embeddings for content
+      operationId: generateEmbeddings
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmbeddingsRequest'
+      responses:
+        '200':
+          description: Generated embeddings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /embeddings/search:
+    post:
+      tags: [Embeddings]
+      summary: Semantic search using embeddings
+      operationId: semanticSearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SemanticSearchRequest'
+      responses:
+        '200':
+          description: Semantic search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SemanticSearchResponse'
+
+  /embeddings/similar/{id}:
+    get:
+      tags: [Embeddings]
+      summary: Find similar content
+      operationId: findSimilar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/limit'
+        - name: threshold
+          in: query
+          schema:
+            type: number
+            format: float
+            minimum: 0
+            maximum: 1
+            default: 0.7
+      responses:
+        '200':
+          description: Similar content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimilarContentResponse'
+
+  /analytics/content:
+    get:
+      tags: [Analytics]
+      summary: Get content analytics
+      operationId: getContentAnalytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [1d, 7d, 30d, 90d]
+            default: 7d
+        - $ref: '#/components/parameters/category'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Content analytics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentAnalyticsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /analytics/trends:
+    get:
+      tags: [Analytics]
+      summary: Get trending topics and analytics
+      operationId: getTrendAnalytics
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [1h, 6h, 24h, 7d]
+            default: 24h
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Trend analytics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendAnalyticsResponse'
+
+  /analytics/creators:
+    get:
+      tags: [Analytics]
+      summary: Get creator analytics
+      operationId: getCreatorAnalytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: 30d
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Creator analytics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatorAnalyticsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /analytics/engagement:
+    get:
+      tags: [Analytics]
+      summary: Get engagement analytics
+      operationId: getEngagementAnalytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [1d, 7d, 30d]
+            default: 7d
+        - name: content_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Engagement analytics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngagementAnalyticsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /admin/content/ingest:
+    post:
+      tags: [Admin]
+      summary: Trigger content ingestion
+      operationId: triggerIngestion
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionRequest'
+      responses:
+        '202':
+          description: Ingestion job queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /admin/videos/generate:
+    post:
+      tags: [Admin]
+      summary: Generate video summary
+      operationId: generateVideo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VideoGenerationRequest'
+      responses:
+        '202':
+          description: Video generation job queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /admin/config:
+    get:
+      tags: [Admin]
+      summary: Get service configuration
+      operationId: getConfig
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Service configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags: [Admin]
+      summary: Update service configuration
+      operationId: updateConfig
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /admin/whitelabel:
+    get:
+      tags: [Admin]
+      summary: Get white-label configuration
+      operationId: getWhitelabelConfig
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: White-label configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WhitelabelConfig'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags: [Admin]
+      summary: Update white-label configuration
+      operationId: updateWhitelabelConfig
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WhitelabelConfig'
+      responses:
+        '200':
+          description: White-label configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /admin/analytics/overview:
+    get:
+      tags: [Admin]
+      summary: Get analytics overview
+      operationId: getAnalyticsOverview
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [1d, 7d, 30d, 90d]
+            default: 7d
+      responses:
+        '200':
+          description: Analytics overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsOverview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    category:
+      name: category
+      in: query
+      schema:
+        type: string
+    platform:
+      name: platform
+      in: query
+      schema:
+        type: string
+        enum: [youtube, twitter, reddit, rss, internal]
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, ready, not_ready]
+        service:
+          type: string
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          additionalProperties:
+            type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total_items:
+          type: integer
+        total_pages:
+          type: integer
+        has_more:
+          type: boolean
+
+    Content:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        creator_id:
+          type: string
+          format: uuid
+        platform:
+          type: string
+          enum: [youtube, twitter, reddit, rss, internal]
+        content_type:
+          type: string
+          enum: [article, video, post, podcast, newsletter]
+        title:
+          type: string
+        description:
+          type: string
+        original_url:
+          type: string
+          format: uri
+        thumbnail_url:
+          type: string
+          format: uri
+        summary:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        geo_classification:
+          type: string
+          enum: [local, regional, national, global]
+        sentiment:
+          type: number
+          format: float
+          minimum: -1
+          maximum: 1
+        quality_score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        engagement_score:
+          type: number
+          format: float
+        view_count:
+          type: integer
+        like_count:
+          type: integer
+        comment_count:
+          type: integer
+        share_count:
+          type: integer
+        published_at:
+          type: string
+          format: date-time
+        ai_analysis:
+          type: object
+          properties:
+            key_points:
+              type: array
+              items:
+                type: string
+            entities:
+              type: array
+              items:
+                type: object
+            topics:
+              type: array
+              items:
+                type: string
+        creator:
+          $ref: '#/components/schemas/Creator'
+
+    Creator:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        platform:
+          type: string
+        avatar_url:
+          type: string
+          format: uri
+        bio:
+          type: string
+        tier:
+          type: string
+          enum: [platinum, gold, silver, bronze, unverified]
+        verified_at:
+          type: string
+          format: date-time
+        follower_count:
+          type: integer
+        engagement_rate:
+          type: number
+          format: float
+
+    Video:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        content_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        video_url:
+          type: string
+          format: uri
+        thumbnail_url:
+          type: string
+          format: uri
+        duration:
+          type: integer
+          description: Duration in seconds
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        view_count:
+          type: integer
+        generated_at:
+          type: string
+          format: date-time
+
+    WhitelabelConfig:
+      type: object
+      properties:
+        tenant_id:
+          type: string
+        display_name:
+          type: string
+        logo_url:
+          type: string
+          format: uri
+        favicon_url:
+          type: string
+          format: uri
+        primary_color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        secondary_color:
+          type: string
+        accent_color:
+          type: string
+        font_family:
+          type: string
+        custom_domain:
+          type: string
+        enabled_platforms:
+          type: array
+          items:
+            type: string
+        enabled_categories:
+          type: array
+          items:
+            type: string
+        settings:
+          type: object
+
+    AnalyticsOverview:
+      type: object
+      properties:
+        tenant_id:
+          type: string
+        time_range:
+          type: string
+        total_content:
+          type: integer
+        content_this_period:
+          type: integer
+        total_creators:
+          type: integer
+        total_videos:
+          type: integer
+        total_views:
+          type: integer
+        engagement_rate:
+          type: number
+        top_categories:
+          type: array
+          items:
+            type: object
+        platform_breakdown:
+          type: array
+          items:
+            type: object
+
+    IngestionRequest:
+      type: object
+      properties:
+        sources:
+          type: array
+          items:
+            type: string
+        platform:
+          type: string
+        force:
+          type: boolean
+          default: false
+
+    VideoGenerationRequest:
+      type: object
+      required:
+        - content_id
+      properties:
+        content_id:
+          type: string
+          format: uuid
+        template_id:
+          type: string
+        voice_id:
+          type: string
+        avatar_id:
+          type: string
+        resolution:
+          type: string
+          enum: [720p, 1080p, 4k]
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    ContentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Content'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ContentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Content'
+
+    CreatorListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Creator'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    CreatorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Creator'
+
+    VideoListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Video'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    VideoResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Video'
+
+    TranscriptResponse:
+      type: object
+      properties:
+        video_id:
+          type: string
+        format:
+          type: string
+        transcript:
+          type: string
+
+    ConfigResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+
+    # AI Schemas
+    AIAnalysisRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: Content to analyze
+        analysis_types:
+          type: array
+          items:
+            type: string
+            enum: [sentiment, entities, topics, summary, keywords]
+          default: [sentiment, entities, topics]
+        options:
+          type: object
+          properties:
+            language:
+              type: string
+              default: en
+            max_entities:
+              type: integer
+              default: 10
+            max_topics:
+              type: integer
+              default: 5
+
+    AIAnalysisResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            sentiment:
+              $ref: '#/components/schemas/SentimentResult'
+            entities:
+              type: array
+              items:
+                $ref: '#/components/schemas/Entity'
+            topics:
+              type: array
+              items:
+                type: string
+            keywords:
+              type: array
+              items:
+                type: string
+            summary:
+              type: string
+            confidence:
+              type: number
+              format: float
+            processing_time_ms:
+              type: integer
+
+    SentimentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/SentimentResult'
+
+    SentimentResult:
+      type: object
+      properties:
+        score:
+          type: number
+          format: float
+          minimum: -1
+          maximum: 1
+        label:
+          type: string
+          enum: [very_negative, negative, neutral, positive, very_positive]
+        confidence:
+          type: number
+          format: float
+
+    EntitiesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            entities:
+              type: array
+              items:
+                $ref: '#/components/schemas/Entity'
+            count:
+              type: integer
+
+    Entity:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+          enum: [person, organization, location, product, event, date, money, percent]
+        start:
+          type: integer
+        end:
+          type: integer
+        confidence:
+          type: number
+          format: float
+
+    SummarizeRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+        max_length:
+          type: integer
+          default: 150
+        style:
+          type: string
+          enum: [bullets, paragraph, headline]
+          default: paragraph
+
+    SummarizeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            summary:
+              type: string
+            key_points:
+              type: array
+              items:
+                type: string
+            word_count:
+              type: integer
+
+    RecommendationsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            recommendations:
+              type: array
+              items:
+                type: object
+                properties:
+                  content:
+                    $ref: '#/components/schemas/Content'
+                  score:
+                    type: number
+                    format: float
+                  reason:
+                    type: string
+            model_version:
+              type: string
+
+    # Embeddings Schemas
+    EmbeddingsRequest:
+      type: object
+      required:
+        - texts
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+          maxItems: 100
+        model:
+          type: string
+          default: text-embedding-ada-002
+        normalize:
+          type: boolean
+          default: true
+
+    EmbeddingsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            embeddings:
+              type: array
+              items:
+                type: array
+                items:
+                  type: number
+                  format: float
+            model:
+              type: string
+            dimensions:
+              type: integer
+            usage:
+              type: object
+              properties:
+                tokens:
+                  type: integer
+
+    SemanticSearchRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+        limit:
+          type: integer
+          default: 10
+          maximum: 100
+        threshold:
+          type: number
+          format: float
+          default: 0.7
+        filters:
+          type: object
+          properties:
+            category:
+              type: string
+            platform:
+              type: string
+            from_date:
+              type: string
+              format: date
+            to_date:
+              type: string
+              format: date
+
+    SemanticSearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            results:
+              type: array
+              items:
+                type: object
+                properties:
+                  content:
+                    $ref: '#/components/schemas/Content'
+                  similarity:
+                    type: number
+                    format: float
+                  rank:
+                    type: integer
+            query_embedding_dimensions:
+              type: integer
+            search_time_ms:
+              type: integer
+
+    SimilarContentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            source_id:
+              type: string
+              format: uuid
+            similar:
+              type: array
+              items:
+                type: object
+                properties:
+                  content:
+                    $ref: '#/components/schemas/Content'
+                  similarity:
+                    type: number
+                    format: float
+
+    # Analytics Schemas
+    ContentAnalyticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            time_range:
+              type: string
+            total_content:
+              type: integer
+            content_by_category:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                  count:
+                    type: integer
+                  percentage:
+                    type: number
+                    format: float
+            content_by_platform:
+              type: array
+              items:
+                type: object
+                properties:
+                  platform:
+                    type: string
+                  count:
+                    type: integer
+            content_over_time:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  count:
+                    type: integer
+            avg_quality_score:
+              type: number
+              format: float
+            avg_engagement_score:
+              type: number
+              format: float
+
+    TrendAnalyticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            time_range:
+              type: string
+            trending_topics:
+              type: array
+              items:
+                type: object
+                properties:
+                  topic:
+                    type: string
+                  count:
+                    type: integer
+                  velocity:
+                    type: number
+                    format: float
+                  trend:
+                    type: string
+                    enum: [rising, stable, falling]
+            trending_entities:
+              type: array
+              items:
+                type: object
+                properties:
+                  entity:
+                    type: string
+                  type:
+                    type: string
+                  mentions:
+                    type: integer
+            sentiment_trend:
+              type: array
+              items:
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                    format: date-time
+                  avg_sentiment:
+                    type: number
+                    format: float
+
+    CreatorAnalyticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            time_range:
+              type: string
+            total_creators:
+              type: integer
+            top_creators:
+              type: array
+              items:
+                type: object
+                properties:
+                  creator:
+                    $ref: '#/components/schemas/Creator'
+                  content_count:
+                    type: integer
+                  total_engagement:
+                    type: integer
+                  avg_quality_score:
+                    type: number
+                    format: float
+            creator_growth:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  new_creators:
+                    type: integer
+            tier_distribution:
+              type: array
+              items:
+                type: object
+                properties:
+                  tier:
+                    type: string
+                  count:
+                    type: integer
+
+    EngagementAnalyticsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            time_range:
+              type: string
+            total_views:
+              type: integer
+            total_likes:
+              type: integer
+            total_comments:
+              type: integer
+            total_shares:
+              type: integer
+            engagement_rate:
+              type: number
+              format: float
+            engagement_over_time:
+              type: array
+              items:
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                    format: date-time
+                  views:
+                    type: integer
+                  likes:
+                    type: integer
+                  comments:
+                    type: integer
+            top_engaged_content:
+              type: array
+              items:
+                type: object
+                properties:
+                  content:
+                    $ref: '#/components/schemas/Content'
+                  total_engagement:
+                    type: integer

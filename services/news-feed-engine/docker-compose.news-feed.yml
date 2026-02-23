@@ -1,0 +1,499 @@
+# ElevatedIQ News Feed Engine - Docker Compose Override
+# This file extends the main docker-compose.yml with the news-feed-engine service
+# Version 2.0 - Elite AI Enhancements
+# Usage: docker compose -f docker-compose.services.yml -f services/news-feed-engine/docker-compose.news-feed.yml up
+
+services:
+  # News Feed Engine - AI-powered content aggregation service
+  elevatediq-news-feed-engine:
+    build:
+      context: ./services/news-feed-engine
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:-2.0.0}
+    image: elevatediq/news-feed-engine:${NEWS_FEED_VERSION:-latest}
+    container_name: elevatediq-news-feed-engine
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    environment:
+      # Standard ELEVATEDIQ_* environment variables
+      ELEVATEDIQ_ENVIRONMENT: ${ELEVATEDIQ_ENVIRONMENT:-production}
+      ELEVATEDIQ_SERVICE_PORT: "8096"
+      ELEVATEDIQ_LOG_LEVEL: ${ELEVATEDIQ_LOG_LEVEL:-info}
+
+      # Database connections
+      POSTGRES_DSN: postgresql://${ELEVATEDIQ_DATABASE_USER:-postgres}:${ELEVATEDIQ_DATABASE_PASSWORD:-postgres}@elevatediq-postgres:5432/news_feed?sslmode=disable
+      MONGO_URI: mongodb://${ELEVATEDIQ_MONGODB_USER:-appsmith}:${ELEVATEDIQ_MONGODB_PASSWORD:-}@elevatediq-mongodb02:27017/news_feed?authSource=admin
+      REDIS_URL: redis://:${ELEVATEDIQ_REDIS_PASSWORD:-}@elevatediq-redis02:6379/1
+
+      # Kafka configuration
+      KAFKA_BROKERS: ${KAFKA_BROKERS:-elevatediq-kafka:9092}
+      KAFKA_CONSUMER_GROUP: news-feed-engine
+      KAFKA_RAW_TOPIC: news-feed-raw-content
+      KAFKA_PROCESSED_TOPIC: news-feed-processed-content
+      KAFKA_VIDEO_TOPIC: news-feed-video-jobs
+      KAFKA_ANALYTICS_TOPIC: news-feed-analytics
+
+      # GCP Secret Manager (production secrets)
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID:-elevatediq-production}
+
+      # Development fallback API keys (use GCP Secret Manager in production)
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      TWITTER_API_KEY: ${TWITTER_API_KEY:-}
+      TWITTER_API_SECRET: ${TWITTER_API_SECRET:-}
+      TWITTER_BEARER_TOKEN: ${TWITTER_BEARER_TOKEN:-}
+      REDDIT_CLIENT_ID: ${REDDIT_CLIENT_ID:-}
+      REDDIT_CLIENT_SECRET: ${REDDIT_CLIENT_SECRET:-}
+      NEWS_API_KEY: ${NEWS_API_KEY:-}
+      TIKTOK_API_KEY: ${TIKTOK_API_KEY:-}
+      CLAUDE_API_KEY: ${CLAUDE_API_KEY:-}
+      ANTHROPIC_API_KEY: ${CLAUDE_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      DID_API_KEY: ${DID_API_KEY:-}
+      JWT_SECRET: ${ELEVATEDIQ_JWT_SECRET:-development-secret-key}
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-}
+
+      # Media Manager integration
+      MEDIA_MANAGER_URL: ${MEDIA_MANAGER_URL:-http://media-manager:8090}
+      MEDIA_MANAGER_API_KEY: ${MEDIA_MANAGER_API_KEY:-}
+
+      # CORS and rate limiting
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://dev.elevatediq.ai,https://elevatediq.ai,https://dev.purebliss.app,https://purebliss.app}
+      RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-100}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW:-60}
+
+      # Content settings
+      DEFAULT_CONTENT_LIMIT: 20
+      MAX_CONTENT_LIMIT: 100
+      INGESTION_INTERVAL_MINUTES: 15
+
+      # Video settings
+      VIDEO_OUTPUT_DIR: /data/videos
+      MAX_CONCURRENT_VIDEOS: 3
+
+      # White-label settings
+      ENABLE_WHITE_LABEL: "true"
+      DEFAULT_TENANT_ID: elevatediq
+      DEFAULT_BRANDING_NAME: "ElevatedIQ News"
+
+      # Elite AI Settings
+      ENABLE_AI_AGENTS: "true"
+      ENABLE_TREND_SOURCES: "true"
+      ENABLE_ANALYTICS_PIPELINE: "true"
+      AGENT_ORCHESTRATION_MODE: "autonomous"
+
+    depends_on:
+      news-feed-postgres:
+        condition: service_healthy
+      news-feed-redis:
+        condition: service_healthy
+    ports:
+      - "8096:8080"
+    volumes:
+      - news_feed_videos:/data/videos
+      - news_feed_cache:/app/cache
+    networks:
+      - elevatediq-net
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.immutable: "true"
+      com.elevatediq.version: ${VERSION:-2.0.0}
+      com.elevatediq.service: news-feed-engine
+      com.elevatediq.component: api
+      com.elevatediq.layer: business
+      com.elevatediq.environment: ${ELEVATEDIQ_ENVIRONMENT:-production}
+      org.elevatediq.project: elevatediq
+      org.elevatediq.managed-by: docker-compose
+      org.elevatediq.component: api
+      org.elevatediq.layer: business
+      org.elevatediq.version: ${NEWS_FEED_VERSION:-latest}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # News Feed ML Processor - Python-based content analysis
+  elevatediq-news-feed-processor:
+    build:
+      context: ./services/news-feed-engine/processor
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:-2.0.0}
+    image: elevatediq/news-feed-processor:${NEWS_FEED_VERSION:-latest}
+    container_name: elevatediq-news-feed-processor
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    environment:
+      # Standard ELEVATEDIQ_* environment variables
+      ELEVATEDIQ_ENVIRONMENT: ${ELEVATEDIQ_ENVIRONMENT:-production}
+      ELEVATEDIQ_LOG_LEVEL: ${ELEVATEDIQ_LOG_LEVEL:-info}
+
+      # Database connections
+      POSTGRES_DSN: postgresql://${ELEVATEDIQ_DATABASE_USER:-postgres}:${ELEVATEDIQ_DATABASE_PASSWORD:-postgres}@elevatediq-postgres:5432/news_feed
+      REDIS_URL: redis://:${ELEVATEDIQ_REDIS_PASSWORD:-}@elevatediq-redis02:6379/1
+
+      # Kafka configuration
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BROKERS:-elevatediq-kafka:9092}
+      KAFKA_CONSUMER_GROUP: news-feed-processor
+      KAFKA_INPUT_TOPIC: news-feed-raw-content
+      KAFKA_OUTPUT_TOPIC: news-feed-processed-content
+
+      # Claude API for content analysis
+      ANTHROPIC_API_KEY: ${CLAUDE_API_KEY:-}
+
+      # Processing settings
+      BATCH_SIZE: 10
+      MAX_WORKERS: 4
+      EMBEDDING_MODEL: text-embedding-ada-002
+
+    depends_on:
+      news-feed-postgres:
+        condition: service_healthy
+      news-feed-redis:
+        condition: service_healthy
+    networks:
+      - elevatediq-net
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.immutable: "true"
+      com.elevatediq.version: ${VERSION:-2.0.0}
+      com.elevatediq.service: news-feed-processor
+      com.elevatediq.component: worker
+      com.elevatediq.layer: business
+      com.elevatediq.environment: ${ELEVATEDIQ_ENVIRONMENT:-production}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:9090/'); sys.exit(0)"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Kafka for event streaming (Elite AI Analytics Pipeline)
+  elevatediq-kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: elevatediq-kafka
+    restart: unless-stopped
+    ports:
+      - "9094:9092"
+      - "9095:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@elevatediq-kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://elevatediq-kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      CLUSTER_ID: elevatediq-kafka-cluster
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - elevatediq-net
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.service: kafka
+      com.elevatediq.component: messaging
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server 127.0.0.1:9092 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Kafka Exporter for Prometheus (consumer lag, broker metrics)
+  elevatediq-kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.7.0
+    container_name: elevatediq-kafka-exporter
+    restart: unless-stopped
+    command:
+      - '--kafka.server=elevatediq-kafka:9092'
+    ports:
+      - '9308:9308'
+    networks:
+      - elevatediq-net
+    depends_on:
+      - elevatediq-kafka
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.service: kafka-exporter
+      com.elevatediq.component: monitoring
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Prometheus for metrics collection
+  elevatediq-prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: elevatediq-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    networks:
+      - elevatediq-net
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.service: prometheus
+      com.elevatediq.component: monitoring
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Blackbox Exporter for HTTP/S probes
+  elevatediq-blackbox-exporter:
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: elevatediq-blackbox-exporter
+    restart: unless-stopped
+    ports:
+      - "9115:9115"
+    command:
+      - --config.file=/etc/blackbox/blackbox.yml
+    volumes:
+      - ./config/blackbox/blackbox.yml:/etc/blackbox/blackbox.yml:ro
+    networks:
+      - elevatediq-net
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.service: blackbox-exporter
+      com.elevatediq.component: monitoring
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Grafana for dashboards
+  elevatediq-grafana:
+    image: grafana/grafana:10.2.2
+    container_name: elevatediq-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: grafana-clock-panel
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - elevatediq-prometheus
+    networks:
+      - elevatediq-net
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.service: grafana
+      com.elevatediq.component: monitoring
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # PostgreSQL Exporter
+  news-feed-postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: news-feed-postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@news-feed-postgres:5432/news_feed?sslmode=disable
+    ports:
+      - '9187:9187'
+    networks:
+      - elevatediq-net
+    depends_on:
+      news-feed-postgres:
+        condition: service_healthy
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.service: postgres-exporter
+      com.elevatediq.component: monitoring
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Redis Exporter
+  news-feed-redis-exporter:
+    image: oliver006/redis_exporter:v1.58.0
+    container_name: news-feed-redis-exporter
+    restart: unless-stopped
+    command:
+      - '--redis.addr=redis://news-feed-redis:6379'
+      - '--redis.password=${ELEVATEDIQ_REDIS_PASSWORD:-}'
+    ports:
+      - '9121:9121'
+    networks:
+      - elevatediq-net
+    depends_on:
+      news-feed-redis:
+        condition: service_healthy
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.service: redis-exporter
+      com.elevatediq.component: monitoring
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # Alertmanager for handling alerts from Prometheus (dev-friendly blackhole receiver)
+  elevatediq-alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: elevatediq-alertmanager
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    volumes:
+      - ${ALERTMANAGER_CONFIG_FILE:-./config/alertmanager/alertmanager.yml}:/etc/alertmanager/alertmanager.yml:ro
+    networks:
+      - elevatediq-net
+    labels:
+      com.elevatediq.managed: "iac"
+      com.elevatediq.service: alertmanager
+      com.elevatediq.component: monitoring
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  # PostgreSQL for local development
+  news-feed-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: news-feed-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: news_feed
+    ports:
+      - "5433:5432"
+    volumes:
+      - news_feed_postgres_data:/var/lib/postgresql/data
+    networks:
+      - elevatediq-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for local development
+  news-feed-redis:
+    image: redis:7-alpine
+    container_name: news-feed-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - news_feed_redis_data:/data
+    networks:
+      - elevatediq-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Additional volumes for news feed service
+volumes:
+  news_feed_videos:
+    name: elevatediq-news-feed-videos
+  news_feed_cache:
+    name: elevatediq-news-feed-cache
+  kafka_data:
+    name: elevatediq-kafka-data
+  prometheus_data:
+    name: elevatediq-prometheus-data
+  grafana_data:
+    name: elevatediq-grafana-data
+  news_feed_postgres_data:
+    name: elevatediq-news-feed-postgres-data
+  news_feed_redis_data:
+    name: elevatediq-news-feed-redis-data
+
+networks:
+  elevatediq-net:
+    name: elevatediq-net

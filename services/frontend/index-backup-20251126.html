@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Enterprise cloud security, marketing automation, and DevOps platform. Trusted by Fortune 500 companies. One unified platform to secure, market, and operate at scale.">
+    <meta name="theme-color" content="#0F172A">
+    <meta property="og:title" content="ElevatedIQ - Enterprise Cloud Security & Automation Platform">
+    <meta property="og:description" content="Trusted by 50%+ of Fortune 100 companies. Protect everything you build and run in the cloud.">
+    <meta property="og:image" content="/assets/og-image.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>ElevatedIQ - Protect Everything You Build and Run in the Cloud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --slate-950: #020617;
+            --slate-900: #0F172A;
+            --slate-800: #1E293B;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748B;
+            --slate-400: #94A3B8;
+            --slate-300: #CBD5E1;
+            --slate-200: #E2E8F0;
+            --slate-100: #F1F5F9;
+            --slate-50: #F8FAFC;
+            --white: #FFFFFF;
+            --purple-500: #8B5CF6;
+            --purple-600: #7C3AED;
+            --purple-700: #6D28D9;
+            --blue-500: #3B82F6;
+            --blue-600: #2563EB;
+            --green-500: #10B981;
+            --green-600: #059669;
+            --orange-500: #F97316;
+            --red-500: #EF4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--slate-200);
+            background: var(--slate-950);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--purple-600);
+            color: var(--white);
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .nav {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, var(--purple-500), var(--blue-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--slate-300);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--white);
+        }
+
+        /* Hero Section */
+        .hero {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            color: var(--purple-500);
+            margin-bottom: 2rem;
+        }
+
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--green-500);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--white), var(--slate-400));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-description {
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            color: var(--slate-400);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            line-height: 1.6;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 4rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple-600), var(--purple-500));
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--white);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.15);
+            border-color: rgba(148, 163, 184, 0.3);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto 6rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--purple-500), var(--blue-500));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--slate-400);
+            font-size: 0.875rem;
+        }
+
+        /* Features */
+        .features {
+            max-width: 1280px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--purple-500);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .section-description {
+            font-size: 1.25rem;
+            color: var(--slate-400);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(59, 130, 246, 0.05));
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--white);
+        }
+
+        .feature-description {
+            color: var(--slate-400);
+            line-height: 1.6;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            color: var(--slate-300);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            color: var(--green-500);
+            font-weight: bold;
+        }
+
+        /* Pricing Preview */
+        .pricing {
+            max-width: 1280px;
+            margin: 6rem auto;
+            padding: 0 2rem;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .pricing-card.featured {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border-color: var(--purple-500);
+            transform: scale(1.05);
+        }
+
+        .pricing-tier {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--purple-500);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-price span {
+            font-size: 1.25rem;
+            color: var(--slate-400);
+            font-weight: 400;
+        }
+
+        .pricing-description {
+            color: var(--slate-400);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            max-width: 900px;
+            margin: 8rem auto;
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 2rem;
+        }
+
+        .cta-section h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.25rem;
+            color: var(--slate-400);
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        .footer {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--slate-400);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+        }
+
+        .footer-text {
+            color: var(--slate-600);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 6rem 1.5rem 3rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: none;
+            }
+
+            .cta-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Animations */
+        @media (prefers-reduced-motion: no-preference) {
+            .hero, .features, .pricing, .cta-section {
+                animation: fadeIn 0.6s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <span>⚡</span> <span>ElevatedIQ</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#products">Products</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="/admin">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="badge">
+            <span class="dot"></span>
+            <span>$131K ARR in 5 weeks · Production ready</span>
+        </div>
+
+        <h1>
+            <span class="gradient-text">The operating system</span><br>
+            for tech companies
+        </h1>
+
+        <p class="hero-description">
+            Replace 5 tools with one platform. Security, Marketing, and DevOps automation powered by AI.
+            Built by engineers, for engineers.
+        </p>
+
+        <div class="cta-group">
+            <a href="/admin" class="btn btn-primary">
+                Get Started →
+            </a>
+            <a href="https://elevatediq.ai" class="btn btn-secondary">
+                View Documentation
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">$131K</div>
+                <div class="stat-label">ARR in 5 Weeks</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">10.3×</div>
+                <div class="stat-label">MTTR Improvement</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">80%</div>
+                <div class="stat-label">Trial Activation</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Security Score</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products -->
+    <section id="products" class="features">
+        <div class="section-header">
+            <div class="section-label">Three Products, One Platform</div>
+            <h2 class="section-title">Everything you need to secure,<br>market, and operate</h2>
+            <p class="section-description">
+                Stop stitching together 5+ tools. Get enterprise-grade security, AI marketing,
+                and DevOps automation in one seamless platform.
+            </p>
+        </div>
+
+        <div class="feature-grid">
+            <!-- Fort Knox -->
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">Fort Knox Code Vault</h3>
+                <p class="feature-description">
+                    Universal security audits across 1,000+ sectors with AI-powered threat detection
+                </p>
+                <ul class="feature-list">
+                    <li>SAST/DAST/SCA scanning</li>
+                    <li>81+ security rules (OWASP Top 10)</li>
+                    <li>Auto-remediation with 3-tier escalation</li>
+                    <li>SOC2, PCI-DSS, HIPAA compliance</li>
+                    <li>Real-time threat intelligence</li>
+                </ul>
+            </div>
+
+            <!-- Marketing Manager -->
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3 class="feature-title">Marketing Manager AI</h3>
+                <p class="feature-description">
+                    Your personal 50-person creative agency. Content, video, voice, auto-posting.
+                </p>
+                <ul class="feature-list">
+                    <li>AI content generation (1000+ ads/day)</li>
+                    <li>Video & animation creation</li>
+                    <li>Voice cloning & deepfakes</li>
+                    <li>Auto-post to all platforms</li>
+                    <li>A/B testing & analytics</li>
+                </ul>
+            </div>
+
+            <!-- DevOps Suite -->
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3 class="feature-title">DevOps Automation Suite</h3>
+                <p class="feature-description">
+                    Complete CI/CD with 8 specialized AI agents for every role
+                </p>
+                <ul class="feature-list">
+                    <li>rrctl CLI (50+ commands)</li>
+                    <li>8 AI agents (Oracle, Security, DevOps)</li>
+                    <li>Full monitoring (Prometheus, Grafana)</li>
+                    <li>Infrastructure as Code (Terraform)</li>
+                    <li>Kubernetes & Docker orchestration</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="pricing">
+        <div class="section-header">
+            <div class="section-label">Simple, Transparent Pricing</div>
+            <h2 class="section-title">Start free, scale as you grow</h2>
+            <p class="section-description">
+                Lock in lifetime 50% discount if you sign before Jan 31, 2026
+            </p>
+        </div>
+
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="pricing-tier">Starter</div>
+                <div class="pricing-price">$49<span>/mo</span></div>
+                <p class="pricing-description">Perfect for small teams</p>
+                <a href="/admin" class="btn btn-secondary" style="width: 100%;">Start Free</a>
+            </div>
+
+            <div class="pricing-card featured">
+                <div class="pricing-tier">Pro</div>
+                <div class="pricing-price">$499<span>/mo</span></div>
+                <p class="pricing-description">Most popular for scale-ups</p>
+                <a href="/admin" class="btn btn-primary" style="width: 100%;">Get Started</a>
+            </div>
+
+            <div class="pricing-card">
+                <div class="pricing-tier">Enterprise</div>
+                <div class="pricing-price">Custom</div>
+                <p class="pricing-description">For large organizations</p>
+                <a href="/admin" class="btn btn-secondary" style="width: 100%;">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ready to 10× your productivity?</h2>
+        <p>Join the tech companies using ElevatedIQ to secure, market, and operate at scale</p>
+        <div class="cta-group">
+            <a href="/admin" class="btn btn-primary">
+                Start Building →
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/admin">Admin Portal</a>
+            <a href="https://elevatediq.ai">Documentation</a>
+            <a href="https://github.com/kushin77/elevatedIQ">GitHub</a>
+        </div>
+        <p class="footer-text">
+            © 2025 ElevatedIQ — Built with ❤️ and 🔥 | "Hack Me If You Can"
+        </p>
+    </footer>
+
+    <!-- Health Check Endpoint -->
+    <div id="health" style="display:none;">healthy</div>
+</body>
+</html>

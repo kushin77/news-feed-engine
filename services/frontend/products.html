@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ElevatedIQ Product Suite - Fort Knox Security, News Feed Engine, Marketing Manager AI, DevOps Automation">
+    <meta name="keywords" content="cloud security, SAST, DAST, SCA, news aggregation, marketing automation, DevOps, AI agents">
+    <meta name="theme-color" content="#0F172A">
+    <meta property="og:title" content="ElevatedIQ Products - Enterprise Cloud Platform">
+    <meta property="og:description" content="Secure, aggregate, market, and operate at cloud scale with AI-powered automation">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dev.elevatediq.ai/products">
+    <link rel="canonical" href="https://dev.elevatediq.ai/products">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <title>Products | ElevatedIQ - Enterprise Cloud Platform</title>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX', {
+            page_path: '/products'
+        });
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --slate-950: #020617;
+            --slate-900: #0F172A;
+            --slate-800: #1E293B;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748B;
+            --slate-400: #94A3B8;
+            --slate-300: #CBD5E1;
+            --slate-200: #E2E8F0;
+            --slate-100: #F1F5F9;
+            --white: #FFFFFF;
+            --purple-500: #8B5CF6;
+            --purple-600: #7C3AED;
+            --blue-500: #3B82F6;
+            --green-500: #10B981;
+            --orange-500: #F97316;
+            --red-500: #EF4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--slate-200);
+            background: linear-gradient(180deg, var(--slate-950) 0%, var(--slate-900) 100%);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+        }
+
+        .nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.25rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--slate-300);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--purple-500);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--purple-600) 0%, var(--blue-500) 100%);
+            color: var(--white);
+            padding: 0.75rem 1.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 10rem 3rem 5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--white);
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--white) 0%, var(--purple-500) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--slate-400);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Product Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            padding: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .product-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-card h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 1rem;
+        }
+
+        .product-tagline {
+            font-size: 1.1rem;
+            color: var(--purple-500);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-description {
+            color: var(--slate-300);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .feature-list li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            color: var(--slate-300);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.05);
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--green-500);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .product-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--purple-500);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--slate-400);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: linear-gradient(135deg, var(--purple-600) 0%, var(--blue-500) 100%);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: background 0.3s ease;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.15);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .badge-new {
+            background: linear-gradient(135deg, var(--green-500) 0%, var(--blue-500) 100%);
+            color: var(--white);
+        }
+
+        .badge-enterprise {
+            background: linear-gradient(135deg, var(--orange-500) 0%, var(--red-500) 100%);
+            color: var(--white);
+        }
+
+        .badge-popular {
+            background: linear-gradient(135deg, var(--purple-600) 0%, var(--purple-500) 100%);
+            color: var(--white);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--slate-900);
+            border-top: 1px solid rgba(148, 163, 184, 0.08);
+            padding: 4rem 3rem 2rem;
+            margin-top: 5rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--slate-400);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--purple-500);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(148, 163, 184, 0.08);
+            text-align: center;
+            color: var(--slate-500);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+            }
+
+            .hero {
+                padding: 8rem 1.5rem 3rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .product-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <a href="/" class="logo">
+                <span style="font-size: 2rem;">⚡</span>
+                <span>ElevatedIQ</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/#products">Products</a></li>
+                <li><a href="/products" class="active">Details</a></li>
+                <li><a href="/pricing">Pricing</a></li>
+                <li><a href="https://elevatediq.ai/blog.html" target="_blank">News & Blog</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <a href="#start-trial" class="cta-button">Start Free Trial</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Complete Enterprise Cloud Platform</h1>
+        <p>Four powerful products working together to secure, aggregate, market, and operate your cloud infrastructure at scale</p>
+    </section>
+
+    <!-- Products Grid -->
+    <div class="products-grid">
+
+        <!-- Fort Knox Security -->
+        <article class="product-card">
+            <span class="badge badge-popular">Most Popular</span>
+            <div class="product-icon">🔒</div>
+            <h2>Fort Knox Security</h2>
+            <p class="product-tagline">Enterprise-Grade Application Security Platform</p>
+            <p class="product-description">
+                Comprehensive security scanning with SAST, DAST, SCA, and container security. AI-powered RCA Oracle provides conversational remediation guidance powered by Ollama models.
+            </p>
+            <ul class="feature-list">
+                <li>Static Application Security Testing (SAST)</li>
+                <li>Dynamic Application Security Testing (DAST)</li>
+                <li>Software Composition Analysis (SCA)</li>
+                <li>Container & Infrastructure Security</li>
+                <li>AI-Powered RCA Oracle for remediation</li>
+                <li>Compliance automation (SOC 2, ISO 27001)</li>
+                <li>Real-time threat intelligence</li>
+                <li>Automated security workflows</li>
+            </ul>
+            <div class="product-stats">
+                <div class="stat">
+                    <span class="stat-value">1M+</span>
+                    <span class="stat-label">Lines Scanned/Min</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">99.9%</span>
+                    <span class="stat-label">Accuracy</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">< 60s</span>
+                    <span class="stat-label">Scan Time</span>
+                </div>
+            </div>
+            <div class="product-actions">
+                <a href="/fort-knox" class="btn-primary">Learn More</a>
+                <a href="#demo" class="btn-secondary">Request Demo</a>
+            </div>
+        </article>
+
+        <!-- News Feed Engine -->
+        <article class="product-card">
+            <span class="badge badge-new">New Release</span>
+            <div class="product-icon">📰</div>
+            <h2>News Feed Engine</h2>
+            <p class="product-tagline">AI-Powered Content Aggregation & Distribution</p>
+            <p class="product-description">
+                Multi-platform news aggregation with intelligent analysis, semantic search, autonomous video generation, and automated cross-platform publishing. Built for media organizations and content creators.
+            </p>
+            <ul class="feature-list">
+                <li>Multi-platform ingestion (YouTube, Twitter, RSS, TikTok)</li>
+                <li>AI content analysis & categorization (Claude)</li>
+                <li>Semantic search with vector embeddings</li>
+                <li>Autonomous video production (ElevenLabs + D-ID)</li>
+                <li>Predictive content engine & trend surfing</li>
+                <li>Cross-platform publishing (12+ platforms)</li>
+                <li>White-label & multi-tenant support</li>
+                <li>Real-time analytics pipeline (Kafka + Grafana)</li>
+            </ul>
+            <div class="product-stats">
+                <div class="stat">
+                    <span class="stat-value">10K+</span>
+                    <span class="stat-label">Articles/Day</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">12+</span>
+                    <span class="stat-label">Platforms</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">5</span>
+                    <span class="stat-label">AI Agents</span>
+                </div>
+            </div>
+            <div class="product-actions">
+                <a href="/news-feed" class="btn-primary">Explore Engine</a>
+                <a href="https://elevatediq.ai/blog.html" target="_blank" class="btn-secondary">View Blog</a>
+            </div>
+        </article>
+
+        <!-- Marketing Manager AI -->
+        <article class="product-card">
+            <span class="badge badge-enterprise">Enterprise</span>
+            <div class="product-icon">🎨</div>
+            <h2>Marketing Manager AI</h2>
+            <p class="product-tagline">Your 50-Person Creative Agency in One Platform</p>
+            <p class="product-description">
+                Generate 1,000+ ads per day across all platforms. Automated content creation, video generation, voice cloning, A/B testing, and real-time ROAS tracking. Replace your $50K/month agency.
+            </p>
+            <ul class="feature-list">
+                <li>AI content generation (1,000+ ads/day)</li>
+                <li>Video & animation creation (ToonCrafter + SDXL)</li>
+                <li>Voice cloning & testimonials (ElevenLabs)</li>
+                <li>Auto-post to 9+ platforms</li>
+                <li>A/B testing & optimization (PostHog)</li>
+                <li>Real-time ROAS dashboard</li>
+                <li>Sector-specific templates (1,000+ industries)</li>
+                <li>Campaign automation & scheduling</li>
+            </ul>
+            <div class="product-stats">
+                <div class="stat">
+                    <span class="stat-value">1000+</span>
+                    <span class="stat-label">Ads/Day</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">98%</span>
+                    <span class="stat-label">Cost Reduction</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">10x</span>
+                    <span class="stat-label">Content Output</span>
+                </div>
+            </div>
+            <div class="product-actions">
+                <a href="/marketing" class="btn-primary">See Platform</a>
+                <a href="#beta" class="btn-secondary">Join Beta</a>
+            </div>
+        </article>
+
+        <!-- DevOps Automation Suite -->
+        <article class="product-card">
+            <span class="badge badge-enterprise">Enterprise</span>
+            <div class="product-icon">🚀</div>
+            <h2>DevOps Automation Suite</h2>
+            <p class="product-tagline">Complete CI/CD with 8 Specialized AI Agents</p>
+            <p class="product-description">
+                Full automation for cloud infrastructure with rrctl CLI (50+ commands), 8 specialized AI agents for every DevOps role, and complete infrastructure-as-code management. Docker + Kubernetes ready.
+            </p>
+            <ul class="feature-list">
+                <li>rrctl CLI with 50+ commands</li>
+                <li>8 specialized AI agents (Oracle, Security, DevOps)</li>
+                <li>Automated CI/CD pipelines</li>
+                <li>Infrastructure as Code (Terraform, Ansible)</li>
+                <li>Container orchestration (Docker, K8s)</li>
+                <li>Monitoring & alerting (Prometheus, Grafana)</li>
+                <li>Cost optimization & resource management</li>
+                <li>Automated incident response</li>
+            </ul>
+            <div class="product-stats">
+                <div class="stat">
+                    <span class="stat-value">50+</span>
+                    <span class="stat-label">CLI Commands</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">8</span>
+                    <span class="stat-label">AI Agents</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">100%</span>
+                    <span class="stat-label">Automated</span>
+                </div>
+            </div>
+            <div class="product-actions">
+                <a href="/devops" class="btn-primary">Discover Suite</a>
+                <a href="#docs" class="btn-secondary">View Docs</a>
+            </div>
+        </article>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Products</h3>
+                <ul class="footer-links">
+                    <li><a href="/fort-knox">Fort Knox Security</a></li>
+                    <li><a href="/news-feed">News Feed Engine</a></li>
+                    <li><a href="/marketing">Marketing Manager AI</a></li>
+                    <li><a href="/devops">DevOps Suite</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="https://elevatediq.ai/blog.html" target="_blank">News & Blog</a></li>
+                    <li><a href="/docs">Documentation</a></li>
+                    <li><a href="/api">API Reference</a></li>
+                    <li><a href="/support">Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Company</h3>
+                <ul class="footer-links">
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/careers">Careers</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                    <li><a href="/partners">Partners</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/security">Security</a></li>
+                    <li><a href="/compliance">Compliance</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 ElevatedIQ. All rights reserved. Built for the cloud, secured by design.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Track page view
+        gtag('event', 'page_view', {
+            page_title: 'Products',
+            page_location: window.location.href,
+            page_path: '/products'
+        });
+
+        // Track product card clicks
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('a')) {
+                    const productName = card.querySelector('h2').textContent;
+                    gtag('event', 'product_view', {
+                        event_category: 'Products',
+                        event_label: productName
+                    });
+                }
+            });
+        });
+
+        // Track CTA clicks
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+            btn.addEventListener('click', () => {
+                gtag('event', 'cta_click', {
+                    event_category: 'Engagement',
+                    event_label: btn.textContent.trim()
+                });
+            });
+        });
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>

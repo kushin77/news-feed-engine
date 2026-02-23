@@ -1,0 +1,82 @@
+{
+  "__inputs": [],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.2.2" },
+    { "type": "panel", "id": "timeseries", "name": "Time series", "version": "8.5.0" },
+    { "type": "panel", "id": "stat", "name": "Stat", "version": "8.5.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "2.0.0" }
+  ],
+  "title": "News Feed Engine",
+  "uid": "news-feed-engine",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "tags": ["news-feed", "engine"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"],
+    "time_options": ["5m", "15m", "1h", "6h", "12h", "24h"]
+  },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Target Up",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 5 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "refId": "A", "expr": "sum(up{job=\"news-feed-engine\"})" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "timeseries",
+      "title": "Scrape Duration (s)",
+      "gridPos": { "x": 4, "y": 0, "w": 10, "h": 5 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "refId": "A", "expr": "avg by(instance) (scrape_duration_seconds{job=\"news-feed-engine\"})" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Go Goroutines",
+      "gridPos": { "x": 0, "y": 5, "w": 8, "h": 7 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "refId": "A", "expr": "sum(go_goroutines)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory (bytes)",
+      "gridPos": { "x": 8, "y": 5, "w": 8, "h": 7 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "refId": "A", "expr": "sum(process_resident_memory_bytes)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU (rate seconds)",
+      "gridPos": { "x": 16, "y": 5, "w": 8, "h": 7 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(process_cpu_seconds_total[5m]))" }
+      ]
+    }
+  ]
+}

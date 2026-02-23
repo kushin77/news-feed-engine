@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "processor"
+version = "2.0.0"
+description = "ElevatedIQ News Feed Engine - Elite AI Processor"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40.0",
+    "httpx>=0.28.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.2.0",
+    "redis>=5.0.0",
+    "prometheus-client>=0.21.0",
+    "kafka-python>=2.0.2",
+    "structlog>=24.4.0",
+    "tenacity>=9.0.0",
+    "numpy>=1.26.4",
+    "aiohttp>=3.9.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "mypy>=1.8.0",
+    "ruff>=0.3.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+asyncio_mode = "auto"
+addopts = "-v --tb=short"

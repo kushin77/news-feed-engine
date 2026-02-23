@@ -1,0 +1,9 @@
+apiVersion: 1
+providers:
+  - name: 'News Feed Infra'
+    orgId: 1
+    folder: 'News Feed'
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards/infra
+    updateIntervalSeconds: 30
