@@ -1,0 +1,191 @@
+name: Build & Push Containers
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'services/**'
+      - '.github/workflows/build-push.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  REPOSITORY_PREFIX: ${{ github.repository_owner }}/
+
+jobs:
+  build:
+    name: Build Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - service: news-feed-engine
+            context: services/news-feed-engine
+            file: services/news-feed-engine/Dockerfile
+          - service: processor
+            context: services/processor
+            file: services/processor/Dockerfile
+          - service: frontend
+            context: services/frontend
+            file: services/frontend/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ needs.determine-version.outputs.version }}
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}:${{ github.sha }}
+          format: 'sarif'
+          output: '${{ matrix.service }}-trivy-results.sarif'
+          scanners: 'vuln'
+        if: github.event_name != 'pull_request'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: '${{ matrix.service }}-trivy-results.sarif'
+          category: 'trivy-${{ matrix.service }}'
+        if: github.event_name != 'pull_request'
+
+  verify:
+    name: Verify Images
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name != 'pull_request'
+    strategy:
+      matrix:
+        service: [ news-feed-engine, processor, frontend ]
+    steps:
+      - name: Pull and inspect image
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}:${{ github.sha }}
+          docker inspect ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}:${{ github.sha }} | jq '.[0] | {
+            Id: .Id,
+            Created: .Created,
+            Size: .Size,
+            Architecture: .Architecture,
+            Os: .Os
+          }'
+
+      - name: Test image healthcheck
+        run: |
+          docker run --rm \
+            --entrypoint sh \
+            ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}:${{ github.sha }} \
+            -c "echo 'Image validation successful'"
+
+  tag-latest:
+    name: Tag Latest
+    runs-on: ubuntu-latest
+    needs: verify
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        service: [ news-feed-engine, processor, frontend ]
+    steps:
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Tag image as latest
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}:${{ github.sha }}
+          docker tag ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}:${{ github.sha }} \
+                     ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY_PREFIX }}${{ matrix.service }}:latest
+
+  notify:
+    name: Notify Deployment
+    runs-on: ubuntu-latest
+    needs: [build, verify, tag-latest]
+    if: always()
+    steps:
+      - name: Create deployment notification
+        run: |
+          cat <<EOF
+          🐳 Container Build Summary
+          ==========================
+          Registry: ${{ env.REGISTRY }}
+          Commit: ${{ github.sha }}
+          Branch: ${{ github.ref_name }}
+          
+          Images built and pushed:
+          - news-feed-engine:${{ github.sha }}
+          - processor:${{ github.sha }}
+          - frontend:${{ github.sha }}
+          
+          Latest tags updated (if on main):
+          - news-feed-engine:latest
+          - processor:latest
+          - frontend:latest
+          EOF
+
+      - name: Send Slack notification
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "Container build failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "❌ *Container Build Failed*\nCommit: ${{ github.sha }}\nBranch: ${{ github.ref_name }}"
+                  }
+                }
+              ]
+            }

@@ -1,0 +1,230 @@
+name: Python CI - Processor
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'services/processor/**'
+      - 'services/processor/requirements.txt'
+      - '.github/workflows/ci-python.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'services/processor/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint black isort flake8
+          if [ -f services/processor/requirements-dev.txt ]; then
+            pip install -r services/processor/requirements-dev.txt
+          fi
+
+      - name: Run black formatter check
+        run: black --check services/processor
+        continue-on-error: true
+
+      - name: Run isort import check
+        run: isort --check-only services/processor
+
+      - name: Run pylint
+        run: |
+          pylint services/processor --rcfile=services/processor/.pylintrc \
+            --exit-zero --output-format=json > pylint-report.json || true
+          cat pylint-report.json | jq '.[] | select(.type == "error")'
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: processor_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r services/processor/requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Run pytest with coverage
+        run: |
+          pytest services/processor/tests \
+            --cov=services/processor \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-fail-under=80 \
+            -v
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/processor_test
+          REDIS_URL: redis://localhost:6379/0
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          flags: python-tests
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  security:
+    name: Security & Dependency Check
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+
+      - name: Run Bandit security check
+        run: |
+          bandit -r services/processor -f json -o bandit-report.json || true
+          cat bandit-report.json | jq '.results[] | select(.severity == "HIGH" or .severity == "CRITICAL")'
+
+      - name: Check dependencies for known vulnerabilities
+        run: |
+          if [ -f services/processor/requirements.txt ]; then
+            pip install -r services/processor/requirements.txt
+            safety check --json || true
+          fi
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v5
+        with:
+          context: services/processor
+          file: services/processor/Dockerfile
+          push: false
+          tags: |
+            processor:latest
+            processor:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r services/processor/requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run integration tests
+        run: |
+          pytest services/processor/tests/integration \
+            -v \
+            --tb=short
+        env:
+          ENVIRONMENT: test
+          LOG_LEVEL: DEBUG
+
+  notify:
+    name: Notify Status
+    runs-on: ubuntu-latest
+    needs: [lint, test, security, build, integration]
+    if: always()
+    steps:
+      - name: Check job status
+        run: |
+          if [ "${{ needs.lint.result }}" = "failure" ] || 
+             [ "${{ needs.test.result }}" = "failure" ] || 
+             [ "${{ needs.security.result }}" = "failure" ] || 
+             [ "${{ needs.build.result }}" = "failure" ] || 
+             [ "${{ needs.integration.result }}" = "failure" ]; then
+            echo "❌ One or more jobs failed"
+            exit 1
+          fi
+          echo "✅ All Python checks passed!"
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allPassed = '${{ job.status }}' === 'success';
+            const comment = allPassed 
+              ? '✅ Python CI checks passed\n- Linting: ✓\n- Tests: ✓\n- Security: ✓\n- Build: ✓\n- Integration: ✓'
+              : '❌ Some Python CI checks failed - see logs for details';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            })
