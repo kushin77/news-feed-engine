@@ -59,7 +59,7 @@ jobs:
         image: postgres:15-alpine
         env:
           POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpass
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
           POSTGRES_DB: news_feed_test
         options: >-
           --health-cmd pg_isready
@@ -93,7 +93,7 @@ jobs:
           go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
         working-directory: services/news-feed-engine
         env:
-          DATABASE_URL: postgres://testuser:testpass@localhost:5432/news_feed_test
+          DATABASE_URL: postgres://testuser:${{ secrets.CI_POSTGRES_PASSWORD }}@localhost:5432/news_feed_test
           REDIS_URL: redis://localhost:6379/0
 
       - name: Upload coverage

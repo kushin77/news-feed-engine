@@ -58,7 +58,7 @@ jobs:
         image: postgres:15-alpine
         env:
           POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpass
+          POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
           POSTGRES_DB: processor_test
         options: >-
           --health-cmd pg_isready
@@ -101,7 +101,7 @@ jobs:
             --cov-fail-under=80 \
             -v
         env:
-          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/processor_test
+          DATABASE_URL: postgresql://testuser:${{ secrets.CI_POSTGRES_PASSWORD }}@localhost:5432/processor_test
           REDIS_URL: redis://localhost:6379/0
 
       - name: Upload coverage to Codecov

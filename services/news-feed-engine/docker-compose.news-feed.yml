@@ -29,7 +29,7 @@ services:
       ELEVATEDIQ_LOG_LEVEL: ${ELEVATEDIQ_LOG_LEVEL:-info}
 
       # Database connections
-      POSTGRES_DSN: postgresql://${ELEVATEDIQ_DATABASE_USER:-postgres}:${ELEVATEDIQ_DATABASE_PASSWORD:-postgres}@elevatediq-postgres:5432/news_feed?sslmode=disable
+      POSTGRES_DSN: postgresql://${ELEVATEDIQ_DATABASE_USER:?ELEVATEDIQ_DATABASE_USER must be set}:${ELEVATEDIQ_DATABASE_PASSWORD:?ELEVATEDIQ_DATABASE_PASSWORD must be set}@elevatediq-postgres:5432/news_feed?sslmode=require
       MONGO_URI: mongodb://${ELEVATEDIQ_MONGODB_USER:-appsmith}:${ELEVATEDIQ_MONGODB_PASSWORD:-}@elevatediq-mongodb02:27017/news_feed?authSource=admin
       REDIS_URL: redis://:${ELEVATEDIQ_REDIS_PASSWORD:-}@elevatediq-redis02:6379/1
 
@@ -58,7 +58,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
       DID_API_KEY: ${DID_API_KEY:-}
-      JWT_SECRET: ${ELEVATEDIQ_JWT_SECRET:-development-secret-key}
+      JWT_SECRET: ${ELEVATEDIQ_JWT_SECRET:?ELEVATEDIQ_JWT_SECRET must be set}
       TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-}
 
       # Media Manager integration
@@ -158,7 +158,7 @@ services:
       ELEVATEDIQ_LOG_LEVEL: ${ELEVATEDIQ_LOG_LEVEL:-info}
 
       # Database connections
-      POSTGRES_DSN: postgresql://${ELEVATEDIQ_DATABASE_USER:-postgres}:${ELEVATEDIQ_DATABASE_PASSWORD:-postgres}@elevatediq-postgres:5432/news_feed
+      POSTGRES_DSN: postgresql://${ELEVATEDIQ_DATABASE_USER:?ELEVATEDIQ_DATABASE_USER must be set}:${ELEVATEDIQ_DATABASE_PASSWORD:?ELEVATEDIQ_DATABASE_PASSWORD must be set}@elevatediq-postgres:5432/news_feed?sslmode=require
       REDIS_URL: redis://:${ELEVATEDIQ_REDIS_PASSWORD:-}@elevatediq-redis02:6379/1
 
       # Kafka configuration
@@ -367,7 +367,7 @@ services:
     container_name: news-feed-postgres-exporter
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@news-feed-postgres:5432/news_feed?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:?POSTGRES_USER must be set}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@news-feed-postgres:5432/news_feed?sslmode=require
     ports:
       - '9187:9187'
     networks:
@@ -445,8 +445,8 @@ services:
     container_name: news-feed-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER must be set}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       POSTGRES_DB: news_feed
     ports:
       - "5433:5432"

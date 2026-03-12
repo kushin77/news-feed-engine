@@ -83,7 +83,7 @@ func Load() (*Config, error) {
 		Environment: getEnv("ELEVATEDIQ_ENVIRONMENT", "development"),
 
 		// Database connections
-		PostgresDSN: getEnv("POSTGRES_DSN", "postgres://postgres:postgres@elevatediq-postgres:5432/news_feed?sslmode=disable"),
+		PostgresDSN: getEnv("POSTGRES_DSN", ""),
 		MongoURI:    getEnv("MONGO_URI", "mongodb://elevatediq-mongodb:27017/news_feed"),
 		RedisURL:    getEnv("REDIS_URL", "redis://elevatediq-redis:6379/0"),
 
@@ -204,7 +204,7 @@ func (c *Config) loadSecretsFromEnv() {
 	c.OpenAIAPIKey = getEnv("OPENAI_API_KEY", "")
 	c.ElevenLabsAPIKey = getEnv("ELEVENLABS_API_KEY", "")
 	c.DIDAPIKey = getEnv("DID_API_KEY", "")
-	c.JWTSecret = getEnv("JWT_SECRET", "development-secret-key")
+	c.JWTSecret = getEnvRequired("JWT_SECRET")
 	c.YouTubeWebhookSecret = getEnv("YOUTUBE_WEBHOOK_SECRET", "")
 	c.TwitterConsumerSecret = getEnv("TWITTER_CONSUMER_SECRET", "")
 }
@@ -215,6 +215,18 @@ func getEnv(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+// getEnvRequired returns the value of an environment variable or terminates the
+// process if the variable is unset or empty. Use this for secrets and other
+// values that have no safe default.
+func getEnvRequired(key string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		fmt.Fprintf(os.Stderr, "FATAL: required environment variable %q is not set\n", key)
+		os.Exit(1)
+	}
+	return value
 }
 
 func getEnvInt(key string, defaultValue int) int {
