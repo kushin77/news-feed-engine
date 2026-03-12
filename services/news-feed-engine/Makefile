@@ -253,19 +253,51 @@ security-deps:
 
 security-audit:
 	@echo "🛡️ Running full security audit..."
-	@mkdir -p reports
+	@mkdir -p reports docs/security/scan-reports
 	$(MAKE) security-test
 	$(MAKE) security-scan
 	$(MAKE) security-deps
+	$(MAKE) vuln-audit
 	@echo ""
 	@echo "📊 Security Audit Summary"
 	@echo "========================="
 	@echo "Security tests: ✅ Complete"
 	@echo "Bandit scan: ✅ Complete"
 	@echo "Dependency scan: ✅ Complete"
+	@echo "Vulnerability audit: ✅ Complete"
 	@echo ""
-	@echo "Reports available in reports/ directory"
+	@echo "Reports available in reports/ and docs/security/scan-reports/ directories"
 	@echo "✅ Full security audit complete"
+
+owasp-scan:
+	@echo "🔍 Running OWASP ZAP baseline scan against local deployment..."
+	@mkdir -p docs/security/scan-reports
+	docker run --rm --network host \
+		-v "$(PWD)/docs/security/scan-reports:/zap/wrk:rw" \
+		ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+		-t http://localhost:8080 \
+		-r owasp-zap-report.html \
+		-J owasp-zap-report.json \
+		-l WARN || true
+	@echo "✅ OWASP ZAP scan complete. Report: docs/security/scan-reports/owasp-zap-report.html"
+
+secret-scan:
+	@echo "🔑 Running gitleaks secret detection scan..."
+	gitleaks detect --source . --verbose --report-path docs/security/scan-reports/gitleaks-report.json
+	@echo "✅ No secrets detected"
+
+vuln-audit:
+	@echo "🔎 Running Go + Python vulnerability audit..."
+	@mkdir -p docs/security/scan-reports
+	govulncheck ./... 2>&1 | tee docs/security/scan-reports/govulncheck-report.txt || true
+	pip-audit -r ../processor/requirements.txt --output docs/security/scan-reports/pip-audit-report.json --format=json || true
+	@echo "✅ Vulnerability audit complete. Reports: docs/security/scan-reports/"
+
+install-hooks:
+	@echo "🪝 Installing git hooks..."
+	cp scripts/hooks/pre-commit .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
+	@echo "✅ pre-commit hook installed (gitleaks secret detection)"
 
 # ==================== DEPLOY ====================
 
@@ -358,9 +390,13 @@ help:
 	@echo ""
 	@echo "Security:"
 	@echo "  make security-test      - Run security tests"
-	@echo "  make security-scan      - Run Bandit security scan"
-	@echo "  make security-deps      - Check for vulnerable dependencies"
-	@echo "  make security-audit     - Run full security audit"
+	@echo "  make security-scan      - Run Bandit security scan (Python)"
+	@echo "  make security-deps      - Check for vulnerable Python dependencies"
+	@echo "  make security-audit     - Run full security audit (all checks)"
+	@echo "  make owasp-scan         - OWASP ZAP baseline scan (requires local service running)"
+	@echo "  make secret-scan        - Run gitleaks secret detection scan"
+	@echo "  make vuln-audit         - govulncheck (Go) + pip-audit (Python) CVE scan"
+	@echo "  make install-hooks      - Install git pre-commit hook (gitleaks)"
 	@echo ""
 	@echo "Lint:"
 	@echo "  make lint           - Run all linters"

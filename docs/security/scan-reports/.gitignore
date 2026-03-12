@@ -1,0 +1,6 @@
+# Ignore generated security scan report files — keep README only
+*.html
+*.json
+*.txt
+*.xml
+*.sarif

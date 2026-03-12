@@ -1,0 +1,21 @@
+#!/bin/sh
+# pre-commit hook — blocks commits containing secrets/credentials/tokens
+# Install with: make install-hooks
+#
+# Requires: gitleaks (https://github.com/gitleaks/gitleaks)
+#   Install: brew install gitleaks  OR  go install github.com/gitleaks/gitleaks/v8@latest
+
+set -e
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "⚠️  gitleaks not found. Install it to enable secret detection:"
+  echo "     brew install gitleaks"
+  echo "     OR: go install github.com/gitleaks/gitleaks/v8@latest"
+  echo "Skipping secret scan (install gitleaks to enforce this check)."
+  exit 0
+fi
+
+echo "🔑 Running gitleaks secret detection on staged changes..."
+gitleaks protect --staged -v
+
+echo "✅ No secrets detected in staged files."
