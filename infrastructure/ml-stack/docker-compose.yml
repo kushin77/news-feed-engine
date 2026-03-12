@@ -1,0 +1,124 @@
+# ML Stack Infrastructure - Docker Compose
+# Deploys: Feast, Qdrant, MLflow, Redis, PostgreSQL
+# Production equivalent: Kubernetes manifests in /k8s subfolder
+
+version: '3.8'
+
+services:
+  # PostgreSQL for MLflow backend & Feast metadata
+  postgres:
+    image: postgres:15-alpine
+    container_name: ml-postgres
+    environment:
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: ${ML_DB_PASSWORD:-secure-password-change-in-prod}
+      POSTGRES_DB: mlflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Feast online store & caching
+  redis:
+    image: redis:7-alpine
+    container_name: ml-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: ml-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-qdrant-key-change-in-prod}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MLflow Tracking Server
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: ml-mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      BACKEND_STORE_URI: postgresql://mlflow:${ML_DB_PASSWORD:-secure-password-change-in-prod}@postgres:5432/mlflow
+      DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+    volumes:
+      - mlflow_artifacts:/mlflow/artifacts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Feast API Server
+  feast-api:
+    build:
+      context: ./feast
+      dockerfile: Dockerfile
+    container_name: ml-feast-api
+    ports:
+      - "6566:6566"
+    environment:
+      FEAST_REPO_PATH: /feast/repo
+      FEAST_STORE: redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: ${ML_DB_PASSWORD:-secure-password-change-in-prod}
+    volumes:
+      - ./feast/repo:/feast/repo
+    depends_on:
+      - redis
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6566/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Qdrant Admin Dashboard (optional, development only)
+  qdrant-dashboard:
+    image: qdrant/qdrant-web-ui:latest
+    container_name: ml-qdrant-web
+    ports:
+      - "5173:80"
+    environment:
+      QDRANT_API_URL: http://qdrant:6333
+    depends_on:
+      - qdrant
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
+  mlflow_artifacts:
+
+networks:
+  default:
+    name: ml-stack
