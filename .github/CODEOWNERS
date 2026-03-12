@@ -1,0 +1,75 @@
+# CODEOWNERS — Enforce ops/platform team review on key areas
+# 
+# This file defines which teams and individuals must review changes to critical
+# areas of the codebase. All changes matching these patterns require approval
+# from the designated reviewers before they can be merged.
+#
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+#==============================================================================
+# PLATFORM & OPERATIONS (Primary governance)
+#==============================================================================
+#
+# All changes to ops, platform, infrastructure, CI/CD, and security must be
+# reviewed and approved by the ops/platform team.
+
+# GitLab CI pipeline configuration
+.gitlab-ci.yml @kushin77 @BestGaaS220
+.gitlab-ci.elite.yml @kushin77 @BestGaaS220
+.gitlab-runners.elite.yml @kushin77 @BestGaaS220
+
+# GitHub workflows and Actions configuration
+.github/workflows/ @kushin77 @BestGaaS220
+.github/actions/ @kushin77 @BestGaaS220
+
+# Infrastructure as Code (Terraform, Kubernetes)
+infra/ @kushin77 @BestGaaS220
+terraform/ @kushin77 @BestGaaS220
+k8s/ @kushin77 @BestGaaS220
+kubernetes/ @kushin77 @BestGaaS220
+
+# Deployment scripts and automation
+scripts/deploy/ @kushin77 @BestGaaS220
+scripts/ops/ @kushin77 @BestGaaS220
+scripts/infrastructure/ @kushin77 @BestGaaS220
+
+# Security policies and compliance
+policies/ @kushin77 @BestGaaS220
+.pre-commit-config.yaml @kushin77 @BestGaaS220
+.pre-commit-hooks.yaml @kushin77 @BestGaaS220
+
+# Secret management and credential configuration
+docs/SECRETS_INVENTORY.md @kushin77 @BestGaaS220
+.gitignore @kushin77 @BestGaaS220
+
+# Cloud Build and CI/CD templates
+cloudbuild.yaml @kushin77 @BestGaaS220
+cicd-runner-platform/ @kushin77 @BestGaaS220
+ci/ @kushin77 @BestGaaS220
+
+#==============================================================================
+# OBSERVABILITY & MONITORING (Secondary governance)
+#==============================================================================
+# Changes to monitoring, dashboards, alerting, and logging must be reviewed
+
+monitoring/ @kushin77 @BestGaaS220
+docs/ELITE_OPERATIONS_RUNBOOKS.md @kushin77 @BestGaaS220
+docs/DEPLOYMENT_BEST_PRACTICES.md @kushin77 @BestGaaS220
+
+#==============================================================================
+# DOCUMENTATION (For critical operational docs)
+#==============================================================================
+# Critical runbooks and operational procedures require approvals
+
+DEPLOY_RUNBOOK.md @kushin77 @BestGaaS220
+docs/GITLAB_ELITE_*.md @kushin77 @BestGaaS220
+OPERATIONAL_HANDOFF_*.md @kushin77 @BestGaaS220
+PRODUCTION_*.md @kushin77 @BestGaaS220
+
+#==============================================================================
+# DEFAULT: Mark as catch-all
+#==============================================================================
+# If a file pattern hasn't been matched yet, and it's critical, we require
+# ops team review for safety.
+
+* @kushin77 @BestGaaS220

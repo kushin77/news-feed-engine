@@ -1,0 +1,45 @@
+# GitHub CODEOWNERS
+# Defines expertise and review requirements for different repository areas
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback
+* @kushin77
+
+# Frontend / Website
+services/frontend/ @kushin77
+services/frontend/**/*.tsx @kushin77
+services/frontend/**/*.css @kushin77
+services/frontend/**/*.ts @kushin77
+
+# Backend / API
+services/api/ @kushin77
+services/api/**/*.ts @kushin77
+services/api/**/*.js @kushin77
+
+# Infrastructure & Deployment
+infrastructure/ @kushin77
+scripts/deploy.sh @kushin77
+scripts/scan-for-secrets.sh @kushin77
+.github/ @kushin77
+
+# Documentation
+docs/ @kushin77
+WEBSITE_BUILDING_ROADMAP.md @kushin77
+*.md @kushin77
+
+# Security & Configuration
+.github/secret-scanning-patterns.yml @kushin77
+CREDENTIAL_PROVISIONING_RUNBOOK.md @kushin77
+copilot-instructions.md @kushin77
+
+# Processor (Python)
+services/processor/ @kushin77
+
+# Social Media Platform
+services/social-media-platform/ @kushin77
+
+# Marketing Engine
+services/marketing-engine/ @kushin77
+
+# News Feed Engine Core
+services/news-feed-engine/ @kushin77
