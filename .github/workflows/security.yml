@@ -1,0 +1,38 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * 1' # Weekly
+
+permissions:
+  security-events: write
+  actions: read
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Go Vulncheck
+        uses: gojek/ gvcheck-action@v0.0.6
+      - name: CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go, python
+      - name: CodeQL Analyze
+        uses: github/codeql-action/analyze@v3
+      - name: Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      - name: Upload Trivy
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif-file: 'trivy-results.sarif'
