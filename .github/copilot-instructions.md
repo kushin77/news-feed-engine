@@ -1,6 +1,36 @@
 # GitHub Copilot Instructions
 
-This repository uses GitHub Copilot for assistance when writing code and documentation.  When interacting with Copilot, keep the following guidelines in mind:
+This repository uses GitHub Copilot for assistance when writing code and documentation. When interacting with Copilot, keep the following guidelines in mind:
+
+## 🔴 NON-NEGOTIABLE REQUIREMENTS (Every Prompt — Exception: Brainstorming)
+
+**These apply to ALL work unless explicitly marked as "brainstorming only":**
+
+1. **Always Update Issues**
+   - Link work to GitHub issues (#number references)
+   - Update issue with progress comments
+   - Add labels: `in-progress`, `faang`, `security`, `testing`, `frontend`, etc.
+   - Close issues when work is complete with brief summary
+   - Comment reasoning for any issue skipping/blocking
+
+2. **Always Commit & Push**
+   - Commit after every logical unit of work
+   - Use conventional commits: `feat(frontend): add React scaffold`, `fix(security): update deps`, `docs(testing): add coverage guide`
+   - Push to feature branch immediately after each commit
+   - Never leave uncommitted work — every change must be tracked
+   - Include issue number in commit: `feat(#110): add vitest setup`
+
+3. **FAANG-Level Quality Standards (Every Output)**
+   - **Code**: TypeScript strict mode, no `any`, full type coverage
+   - **Testing**: >70% coverage minimum (aim 80%+), unit + integration tests
+   - **Security**: No hardcoded secrets, no console.logs in prod, ESLint security rules enforced
+   - **Performance**: Lighthouse 90+, <3s LCP, <100ms FID, bundle <100KB (gzip)
+   - **Accessibility**: WCAG 2.1 Level AA minimum
+   - **Documentation**: Every function/component has JSDoc with examples
+   - **Linting**: Zero warnings in ESLint, Prettier formatted, Husky pre-commit hooks
+   - **CI/CD**: Green status on all checks, no merge without approval
+
+---
 
 1. **No GitHub Actions**
    - The project enforces a strict "NO GITHUB ACTIONS" policy. All CI, deployment, and release automation runs on trusted hosts or scheduled timers. Do not suggest, create, or modify workflows under `.github/workflows/`.
