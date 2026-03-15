@@ -1,0 +1,33 @@
+name: Python CI
+
+on:
+  push:
+    branches: [ 'main', 'blackboxai/**' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/processor
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install -r requirements.txt pytest pytest-cov ruff black
+      - name: Lint
+        run: |
+          cd ..
+          make lint-python
+      - name: Test
+        run: pytest tests/ --cov=processor --cov-report=xml -v
+      - name: Coverage
+        uses: codecov/codecov-action@v5
