@@ -2,9 +2,8 @@ import React from 'react'
 import { useEffect } from 'react'
 import { Zap, Users, Share2, TrendingUp } from 'lucide-react'
 import { ConnectorCard } from './ConnectorCard'
-import { useConnectorStore } from '@store/connectors'
-import { CONNECTOR_CAPABILITIES } from '@types/connectors'
-import type { ConnectorPlatform } from '@types/connectors'
+import { useConnectorStore } from '../store/connectors'
+import type { ConnectorPlatform } from '../types/connectors'
 
 /**
  * Social Connectors Panel - Display and manage social media connections
@@ -26,15 +25,30 @@ export function ConnectorPanel(): React.ReactElement {
   useEffect(() => {
     if (connectors.length === 0) {
       const platforms: ConnectorPlatform[] = ['instagram', 'tiktok', 'youtube', 'twitter', 'facebook', 'threads']
+      const platformNames: Record<ConnectorPlatform, string> = {
+        instagram: 'Instagram',
+        tiktok: 'TikTok',
+        youtube: 'YouTube',
+        twitter: 'X/Twitter',
+        facebook: 'Facebook',
+        threads: 'Threads',
+      }
+      const platformIcons: Record<ConnectorPlatform, string> = {
+        instagram: '📸',
+        tiktok: '🎵',
+        youtube: '📺',
+        twitter: '𝕏',
+        facebook: 'f',
+        threads: '💬',
+      }
       const initialConnectors = platforms.map((platform) => ({
-        id: `${platform}-${Date.now()}`,
+        id: `${platform}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
         platform,
+        name: platformNames[platform],
+        icon: platformIcons[platform],
         status: 'disconnected' as const,
         handle: '',
-        followers: 0,
-        lastSync: null,
-        config: CONNECTOR_CAPABILITIES[platform],
-        createdAt: new Date().toISOString(),
+        followerCount: 0,
       }))
       setConnectors(initialConnectors)
     }
@@ -42,8 +56,8 @@ export function ConnectorPanel(): React.ReactElement {
 
   // Calculate stats
   const connectedCount = connectors.filter((c) => c.status === 'connected').length
-  const totalFollowers = connectors.reduce((sum, c) => sum + c.followers, 0)
-  const readyToPublish = connectors.filter((c) => c.status === 'connected' && c.config.canPublish).length
+  const totalFollowers = connectors.reduce((sum, c) => sum + (c.followerCount || 0), 0)
+  const readyToPublish = connectors.filter((c) => c.status === 'connected').length
 
   const platformDescriptions: Record<ConnectorPlatform, string> = {
     instagram: 'Instagram/Meta: 2.96B users, Reels + Stories + Posts',
@@ -94,52 +108,46 @@ export function ConnectorPanel(): React.ReactElement {
           {connectors.map((connector) => (
             <div
               key={connector.id}
-              onClick={() => selectConnector(connector.id)}
               className={`cursor-pointer transition-all ${
-                selectedConnector === connector.id ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-950' : ''
+                selectedConnector?.id === connector.id
+                  ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-950'
+                  : ''
               }`}
             >
-              <ConnectorCard connector={connector} isSelected={selectedConnector === connector.id} />
+              <ConnectorCard
+                connector={connector}
+                onConnect={(id) => console.log('Connect:', id)}
+                onDisconnect={(id) => console.log('Disconnect:', id)}
+                onSelect={() => selectConnector(connector)}
+              />
             </div>
           ))}
         </div>
       )}
 
       {/* Selected Connector Details */}
-      {selectedConnector && connectors.find((c) => c.id === selectedConnector) && (
+      {selectedConnector && (
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-lg p-6">
           <h3 className="text-lg font-bold text-white mb-4">Connector Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Platform</p>
-              <p className="text-white capitalize">{connectors.find((c) => c.id === selectedConnector)?.platform}</p>
+              <p className="text-white capitalize">{selectedConnector.platform}</p>
             </div>
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Status</p>
               <div className="flex items-center gap-2">
                 <div
                   className={`w-2 h-2 rounded-full ${
-                    connectors.find((c) => c.id === selectedConnector)?.status === 'connected'
-                      ? 'bg-green-500'
-                      : 'bg-slate-500'
+                    selectedConnector.status === 'connected' ? 'bg-green-500' : 'bg-slate-500'
                   }`}
                 />
-                <p className="text-white capitalize">{connectors.find((c) => c.id === selectedConnector)?.status}</p>
+                <p className="text-white capitalize">{selectedConnector.status}</p>
               </div>
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Capabilities</p>
-              <div className="flex flex-wrap gap-2">
-                {connectors.find((c) => c.id === selectedConnector)?.config?.canPublish && (
-                  <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs rounded">Publish</span>
-                )}
-                {connectors.find((c) => c.id === selectedConnector)?.config?.canSchedule && (
-                  <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded">Schedule</span>
-                )}
-                {connectors.find((c) => c.id === selectedConnector)?.config?.canAnalytics && (
-                  <span className="px-2 py-1 bg-orange-500/20 text-orange-300 text-xs rounded">Analytics</span>
-                )}
-              </div>
+              <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Followers</p>
+              <p className="text-white">{(selectedConnector.followerCount || 0).toLocaleString()}</p>
             </div>
           </div>
         </div>
