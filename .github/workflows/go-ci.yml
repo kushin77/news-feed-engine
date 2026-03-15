@@ -1,0 +1,31 @@
+name: Go CI
+
+on:
+  push:
+    branches: [ 'main', 'blackboxai/**' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/news-feed-engine
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Lint
+        run: make lint-go
+      - name: Test
+        run: make test-go
+      - name: Coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./services/news-feed-engine/coverage.out
