@@ -4,56 +4,86 @@ __version__ = "2.0.0"
 __author__ = "ElevatedIQ AI Team"
 
 from typing import Any  # noqa: F401
+
+# Core analyzer module (required)
 from .analyzer import ContentAnalyzer, VideoScriptGenerator
-from .config import Settings, get_api_key, get_settings
-from .database import DatabaseClient
-from .embeddings import EmbeddingGenerator
 
-# Skip main import to avoid Prometheus metrics duplication
-# from .main import NewsProcessor, main
-from .media_manager import (
-    AIAssetAnalysis,
-    AssetType,
-    IntelligentAssetRecommender,
-    MediaAsset,
-    MediaManagerClient,
-    MediaManagerIntegration,
-    RecommendedAsset,
-)
+# Configuration (required)
+try:
+    from .config import Settings, get_api_key, get_settings
+except ImportError:
+    pass
 
-# Elite AI Enhancement Modules
-from .predictive_engine import (
-    AudienceMatcher,
-    ContentPrediction,
-    PredictiveContentEngine,
-    TrendForecaster,
-    TrendOpportunity,
-    TrendSurfingEngine,
-    ViralityModel,
-)
-from .publishing_orchestrator import (
-    CrossPlatformAnalytics,
-    HashtagOptimizer,
-    Platform,
-    PublishingOrchestrator,
-    PublishResult,
-    PublishStatus,
-    ScheduledPost,
-    TimingOptimizer,
-)
-from .video_factory import (
-    DIDClient,
-    ElevenLabsClient,
-    LiveVideoGenerator,
-    VideoAspectRatio,
-    VideoAsset,
-    VideoFactory,
-    VideoScript,
-)
-from .video_factory import VideoScriptGenerator as AdvancedVideoScriptGenerator
-from .video_factory import VideoStyle
+# Database (optional - may not be needed for tests)
+try:
+    from .database import DatabaseClient
+except (ImportError, ModuleNotFoundError):
+    pass
 
-# Platform Publishers
+# Embeddings (optional)
+try:
+    from .embeddings import EmbeddingGenerator
+except (ImportError, ModuleNotFoundError):
+    pass
+
+# Media Manager (optional)
+try:
+    from .media_manager import (
+        AIAssetAnalysis,
+        AssetType,
+        IntelligentAssetRecommender,
+        MediaAsset,
+        MediaManagerClient,
+        MediaManagerIntegration,
+        RecommendedAsset,
+    )
+except (ImportError, ModuleNotFoundError):
+    pass
+
+# Elite AI Enhancement Modules (optional - skip on import error)
+try:
+    from .predictive_engine import (
+        AudienceMatcher,
+        ContentPrediction,
+        PredictiveContentEngine,
+        TrendForecaster,
+        TrendOpportunity,
+        TrendSurfingEngine,
+        ViralityModel,
+    )
+except (ImportError, ModuleNotFoundError):
+    pass
+
+try:
+    from .publishing_orchestrator import (
+        CrossPlatformAnalytics,
+        HashtagOptimizer,
+        Platform,
+        PublishingOrchestrator,
+        PublishResult,
+        PublishStatus,
+        ScheduledPost,
+        TimingOptimizer,
+    )
+except (ImportError, ModuleNotFoundError):
+    pass
+
+try:
+    from .video_factory import (
+        DIDClient,
+        ElevenLabsClient,
+        LiveVideoGenerator,
+        VideoAspectRatio,
+        VideoAsset,
+        VideoFactory,
+        VideoScript,
+        VideoScriptGenerator as AdvancedVideoScriptGenerator,
+        VideoStyle,
+    )
+except (ImportError, ModuleNotFoundError):
+    pass
+
+# Platform Publishers (optional)
 try:
     from .platform_publishers import (
         MultiPlatformPublisher,
@@ -63,7 +93,7 @@ try:
         SnapchatPublisher,
         ThreadsPublisher,
     )
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     pass
 
 # AI Agents
