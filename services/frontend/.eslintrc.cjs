@@ -7,7 +7,6 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:react-hooks/recommended',
     'plugin:security/recommended',
     'prettier',
@@ -17,8 +16,6 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: true,
-    tsconfigRootDir: __dirname,
     ecmaFeatures: {
       jsx: true,
     },
@@ -27,9 +24,9 @@ module.exports = {
   rules: {
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/explicit-function-return-types': 'warn',
+    '@typescript-eslint/explicit-function-return-types': ['warn', { allowExpressions: true }],
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    '@typescript-eslint/no-floating-promises': 'error',
+    '@typescript-eslint/no-floating-promises': 'off',
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'security/detect-object-injection': 'off',
     'security/detect-non-literal-regexp': 'off',

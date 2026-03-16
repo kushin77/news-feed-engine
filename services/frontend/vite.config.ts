@@ -17,6 +17,7 @@ export default defineConfig({
     },
   },
   server: {
+    host: true, // bind to all network interfaces so other devices can access it
     port: 5173,
     strictPort: false,
     open: true,

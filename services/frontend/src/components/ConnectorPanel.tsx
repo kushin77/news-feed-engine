@@ -116,8 +116,8 @@ export function ConnectorPanel(): React.ReactElement {
             >
               <ConnectorCard
                 connector={connector}
-                onConnect={(id) => console.log('Connect:', id)}
-                onDisconnect={(id) => console.log('Disconnect:', id)}
+                onConnect={(_id) => undefined}
+                onDisconnect={(_id) => undefined}
                 onSelect={() => selectConnector(connector)}
               />
             </div>
