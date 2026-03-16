@@ -1,0 +1,114 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-ml-config
+  namespace: ml-stack
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: []
+
+    rule_files:
+      - /etc/prometheus/rules/*.yml
+
+    scrape_configs:
+      - job_name: 'kserve-trend'
+        kubernetes_sd_configs:
+          - role: service
+            namespaces:
+              names:
+                - ml-stack
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: trend-forecast
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: metrics
+
+      - job_name: 'kserve-virality'
+        kubernetes_sd_configs:
+          - role: service
+            namespaces:
+              names:
+                - ml-stack
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: virality-ensemble
+          - source_labels: [__meta_kubernetes_pod_container_port_name]
+            action: keep
+            regex: metrics
+
+      - job_name: 'feast-api'
+        static_configs:
+          - targets: ['feast-api:6566']
+
+      - job_name: 'mlflow'
+        static_configs:
+          - targets: ['mlflow:5000']
+
+      - job_name: 'qdrant'
+        static_configs:
+          - targets: ['qdrant-service:6333']
+
+      - job_name: 'redis'
+        static_configs:
+          - targets: ['redis:6379']
+
+      - job_name: 'traefik'
+        static_configs:
+          - targets: ['traefik:9100']
+
+  alert-rules.yml: |
+    groups:
+      - name: model-serving
+        interval: 30s
+        rules:
+          - alert: KServeHighLatency
+            expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=~"kserve.*"}[5m])) > 0.3
+            for: 5m
+            annotations:
+              summary: "KServe Model Latency High"
+              description: "{{ $labels.instance }} p99 latency > 300ms"
+
+          - alert: KServeHighErrorRate
+            expr: rate(http_requests_total{job=~"kserve.*", status=~"5.."}[5m]) > 0.01
+            for: 5m
+            annotations:
+              summary: "KServe Error Rate High"
+              description: "{{ $labels.instance }} error rate > 1%"
+
+          - alert: FeastUnhealthy
+            expr: up{job="feast-api"} == 0
+            for: 1m
+            annotations:
+              summary: "Feast API Down"
+              description: "Feast API is not responding"
+
+          - alert: QdrantUnhealthy
+            expr: up{job="qdrant"} == 0
+            for: 1m
+            annotations:
+              summary: "Qdrant Down"
+              description: "Qdrant vector database is not responding"
+
+          - alert: MLflowUnhealthy
+            expr: up{job="mlflow"} == 0
+            for: 1m
+            annotations:
+              summary: "MLflow Server Down"
+              description: "MLflow tracking server is not responding"
+
+          - alert: RedisUnhealthy
+            expr: up{job="redis"} == 0
+            for: 1m
+            annotations:
+              summary: "Redis Down"
+              description: "Redis cache is not responding"

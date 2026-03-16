@@ -7,7 +7,6 @@ services:
     build:
       context: ../../services/news-feed-engine
       dockerfile: Dockerfile.enhanced
-    container_name: elevatediq-news-feed-processor
     networks:
       - elevatediq-app
       - elevatediq-data
@@ -16,7 +15,7 @@ services:
       - NODE_ENV=${NODE_ENV:-production}
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - REDIS_URL=redis://elevatediq-redis-01:6379
-      - DATABASE_URL=postgresql://elevatediq:${DB_PASSWORD}@elevatediq-postgres-01:5432/elevatediq
+      - DATABASE_URL=postgresql://elevatediq:${DB_PASSWORD:-password}@elevatediq-postgres-01:5432/elevatediq
       - PROCESSING_WORKERS=${NEWS_FEED_WORKERS:-4}
       - BATCH_SIZE=${NEWS_FEED_BATCH_SIZE:-100}
     volumes:
@@ -57,7 +56,6 @@ services:
     build:
       context: ../../services/news-feed-engine/processor
       dockerfile: Dockerfile
-    container_name: elevatediq-news-feed-aggregator
     networks:
       - elevatediq-app
       - elevatediq-data
@@ -92,7 +90,6 @@ services:
     build:
       context: ../../services/news-feed-engine
       dockerfile: Dockerfile
-    container_name: elevatediq-news-feed-api
     networks:
       - elevatediq-public
       - elevatediq-app
