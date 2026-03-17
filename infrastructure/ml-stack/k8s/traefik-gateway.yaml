@@ -1,0 +1,244 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-config
+  namespace: ml-stack
+data:
+  traefik.yaml: |
+    global:
+      checkNewVersion: false
+      sendAnonymousUsage: false
+
+    api:
+      insecure: true
+      dashboard: true
+      debug: true
+
+    entryPoints:
+      web:
+        address: ":80"
+      websecure:
+        address: ":443"
+      inference:
+        address: ":8081"
+
+    providers:
+      kubernetesCRD:
+        endpoint: http://kubernetes.default.svc
+        namespaces:
+          - ml-stack
+          - elevatediq
+
+    log:
+      level: INFO
+      format: json
+
+    accessLog:
+      format: json
+
+    metrics:
+      prometheus:
+        addEntryPointsLabels: true
+        addServicesLabels: true
+        buckets:
+          - 0.1
+          - 0.3
+          - 1.0
+          - 3.0
+          - 10.0
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: ml-stack
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik
+      containers:
+      - name: traefik
+        image: traefik:v3.0
+        ports:
+        - name: web
+          containerPort: 80
+        - name: websecure
+          containerPort: 443
+        - name: inference
+          containerPort: 8081
+        - name: admin
+          containerPort: 8080
+        - name: metrics
+          containerPort: 9100
+        volumeMounts:
+        - name: traefik-config
+          mountPath: /etc/traefik
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+      volumes:
+      - name: traefik-config
+        configMap:
+          name: traefik-config
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik
+  namespace: ml-stack
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: traefik
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - services
+      - endpoints
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+      - ingressclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - traefik.containo.us
+    resources:
+      - ingressroutes
+      - ingressroutetcps
+      - ingressrouteudps
+      - middlewares
+      - middlewaretcps
+      - tlsoptions
+      - tlsstores
+      - traefikservices
+    verbs:
+      - get
+      - list
+      - watch
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: traefik
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik
+subjects:
+  - kind: ServiceAccount
+    name: traefik
+    namespace: ml-stack
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: ml-stack
+spec:
+  type: LoadBalancer
+  ports:
+  - name: web
+    port: 80
+    targetPort: web
+  - name: websecure
+    port: 443
+    targetPort: websecure
+  - name: inference
+    port: 8081
+    targetPort: inference
+  - name: admin
+    port: 8080
+    targetPort: admin
+  selector:
+    app: traefik
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kserve-trend
+  namespace: ml-stack
+spec:
+  entryPoints:
+    - inference
+  routes:
+    - match: PathPrefix(`/v1/models/trend-forecast`)
+      kind: Rule
+      services:
+        - name: trend-forecast
+          port: 80
+          kind: TraefikService
+      middlewares:
+        - name: rate-limit
+        - name: timeout
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kserve-virality
+  namespace: ml-stack
+spec:
+  entryPoints:
+    - inference
+  routes:
+    - match: PathPrefix(`/v1/models/virality-ensemble`)
+      kind: Rule
+      services:
+        - name: virality-ensemble
+          port: 80
+          kind: TraefikService
+      middlewares:
+        - name: rate-limit
+        - name: timeout
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit
+  namespace: ml-stack
+spec:
+  rateLimit:
+    average: 1000
+    burst: 5000
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: timeout
+  namespace: ml-stack
+spec:
+  headers:
+    customRequestHeaders:
+      X-Request-Timeout: "300"
+    customResponseHeaders:
+      X-Response-Timeout: "300"

@@ -1,0 +1,44 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: virality-ensemble
+  namespace: ml-stack
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: xgboost
+      storageUri: s3://elevatediq-ml/models/virality_ensemble/v1
+      resources:
+        limits:
+          memory: 2Gi
+          cpu: "1"
+        requests:
+          memory: 1Gi
+          cpu: "500m"
+    minReplicas: 2
+    maxReplicas: 50
+    autoscalerClass: kserve.subresources.autoscaling/v1beta1
+    metrics:
+      - type: rps
+        target:
+          averageValue: "100"
+  canaryTrafficPercent: 5
+
+---
+apiVersion: autoscaling.kserve.io/v1alpha1
+kind: ServerlessService
+metadata:
+  name: virality-ensemble
+  namespace: ml-stack
+spec:
+  minReplicas: 2
+  maxReplicas: 50
+  targetUtilizationPercentage: 70
+  metrics:
+    - type: rps
+      target:
+        averageValue: "100"
+    - type: cpu
+      target:
+        averageUtilization: 70

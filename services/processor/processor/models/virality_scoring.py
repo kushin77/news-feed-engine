@@ -13,7 +13,7 @@ FAANG Standards:
 """
 
 import logging
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler

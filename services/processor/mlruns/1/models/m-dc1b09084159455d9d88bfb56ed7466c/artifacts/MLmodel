@@ -1,0 +1,23 @@
+artifact_path: file:E:/Coding/Dad/news-feed-engine/services/processor/mlruns/1/models/m-dc1b09084159455d9d88bfb56ed7466c/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.0
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.10.1
+model_id: m-dc1b09084159455d9d88bfb56ed7466c
+model_size_bytes: 602536
+model_uuid: m-dc1b09084159455d9d88bfb56ed7466c
+prompts: null
+run_id: bcdb0d8d782e4346af6b5b2de037ce15
+utc_time_created: '2026-03-17 01:30:37.543720'
