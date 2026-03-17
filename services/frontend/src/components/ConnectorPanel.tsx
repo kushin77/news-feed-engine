@@ -8,8 +8,15 @@ import type { ConnectorPlatform } from '../types/connectors'
 /**
  * Social Connectors Panel - Display and manage social media connections
  *
- * Shows connection status for all Tier 1 platforms (Instagram, TikTok, YouTube, X).
+ * Shows connection status for all platforms (Instagram, TikTok, YouTube, X, etc.).
  * Uses Zustand for global state management of connector connections.
+ *
+ * Features:
+ * - Display all platform connectors with current connection status
+ * - Connect/disconnect buttons with loading states
+ * - Real-time follower count and sync status
+ * - Connector details view
+ * - Error handling and user feedback
  *
  * @returns {React.ReactElement} Connector panel component
  *
@@ -19,7 +26,7 @@ import type { ConnectorPlatform } from '../types/connectors'
  * ```
  */
 export function ConnectorPanel(): React.ReactElement {
-  const { connectors, selectedConnector, isLoading, selectConnector, setConnectors } = useConnectorStore()
+  const { connectors, selectedConnector, loadingConnectorId, selectConnector, setConnectors, connectPlatform, disconnectPlatform } = useConnectorStore()
 
   // Initialize connectors on mount if empty
   useEffect(() => {
@@ -60,12 +67,12 @@ export function ConnectorPanel(): React.ReactElement {
   const readyToPublish = connectors.filter((c) => c.status === 'connected').length
 
   const platformDescriptions: Record<ConnectorPlatform, string> = {
-    instagram: 'Instagram/Meta: 2.96B users, Reels + Stories + Posts',
+    instagram: 'Instagram: 2.96B users, Reels + Stories + Posts',
     tiktok: 'TikTok: 1.56B users, vertical video native',
     youtube: 'YouTube: 2.6B users, discovery engine',
-    twitter: 'X/Twitter: 368M users, real-time engagement + news',
-    facebook: 'Facebook: 2.96B users, broad demographic reach',
-    threads: 'Threads: Meta\'s text-based social platform',
+    twitter: 'X/Twitter: 368M users, real-time engagement',
+    facebook: 'Facebook: 2.96B users, broad demographic',
+    threads: 'Threads: Meta\'s text-based platform',
   }
 
   return (
@@ -73,16 +80,16 @@ export function ConnectorPanel(): React.ReactElement {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-white mb-2">Social Platform Connectors</h2>
-        <p className="text-slate-400">Connect your social media accounts to reach 80%+ of digital audiences</p>
+        <p className="text-slate-400">Connect your accounts and reach billions of potential audiences</p>
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
           { label: 'Connected', value: `${connectedCount}/${connectors.length}`, icon: <Zap className="w-5 h-5" /> },
-          { label: 'Total Reach', value: `${(totalFollowers / 1000).toFixed(1)}K`, icon: <Users className="w-5 h-5" /> },
+          { label: 'Total Reach', value: `${(totalFollowers / 1000000).toFixed(1)}M`, icon: <Users className="w-5 h-5" /> },
           { label: 'Ready to Publish', value: String(readyToPublish), icon: <Share2 className="w-5 h-5" /> },
-          { label: 'Trend Score', value: '0%', icon: <TrendingUp className="w-5 h-5" /> },
+          { label: 'Platforms', value: String(connectors.length), icon: <TrendingUp className="w-5 h-5" /> },
         ].map((stat, i) => (
           <div key={i} className="bg-slate-900 border border-slate-800 rounded-lg p-4">
             <div className="flex items-center gap-3 mb-2">
@@ -94,16 +101,8 @@ export function ConnectorPanel(): React.ReactElement {
         ))}
       </div>
 
-      {/* Loading State */}
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border border-purple-500/30 border-t-purple-500" />
-          <span className="ml-3 text-slate-400">Loading connectors...</span>
-        </div>
-      )}
-
       {/* Connectors Grid */}
-      {!isLoading && connectors.length > 0 && (
+      {connectors.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {connectors.map((connector) => (
             <div
@@ -116,9 +115,10 @@ export function ConnectorPanel(): React.ReactElement {
             >
               <ConnectorCard
                 connector={connector}
-                onConnect={(_id) => undefined}
-                onDisconnect={(_id) => undefined}
-                onSelect={() => selectConnector(connector)}
+                onConnect={connectPlatform}
+                onDisconnect={disconnectPlatform}
+                onSelect={selectConnector}
+                isLoading={loadingConnectorId === connector.id}
               />
             </div>
           ))}
@@ -150,22 +150,9 @@ export function ConnectorPanel(): React.ReactElement {
               <p className="text-white">{(selectedConnector.followerCount || 0).toLocaleString()}</p>
             </div>
           </div>
+          <p className="text-sm text-slate-400 mt-4">{platformDescriptions[selectedConnector.platform]}</p>
         </div>
       )}
-
-      {/* Info Card */}
-      <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-6">
-        <h4 className="font-bold text-white mb-2">🚀 Platform Coverage</h4>
-        <ul className="space-y-2 text-sm text-slate-300">
-          {Object.entries(platformDescriptions)
-            .slice(0, 4)
-            .map(([_, desc]) => (
-              <li key={desc}>
-                <strong>{desc.split(':')[0]}:</strong> {desc.split(': ')[1]}
-              </li>
-            ))}
-        </ul>
-      </div>
     </div>
   )
 }

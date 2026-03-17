@@ -23,7 +23,7 @@ interface APIConfig {
  */
 export function createAPIClient(config: Partial<APIConfig> = {}): AxiosInstance {
   const defaultConfig: APIConfig = {
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8082',
     timeout: 10000,
     retries: 3,
   }
